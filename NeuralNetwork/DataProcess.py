@@ -25,9 +25,6 @@ def splitSpeiData(xlsx):
     SpeiValues, SpeiNormalizedValues = getSpeiValues(df)
     monthValues = getMonthValues(df)
 
-    #normalizando os valores do SPEI
-    SpeiNormalizedValues = (SpeiValues-np.min(SpeiValues))/np.max(SpeiValues-np.min(SpeiValues))
-
     split= int(len(SpeiNormalizedValues)*parcelDataTrain)
 
     speiTrainData = SpeiNormalizedValues[0:split]
