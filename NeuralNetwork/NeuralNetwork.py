@@ -44,8 +44,8 @@ def cria_IN_OUT(data, janela):
     OUT_indices = np.arange(janela, len(data), janela)
     OUT = data[OUT_indices]
     lin_x = len(OUT)
-    IN = data[range(janela*len(OUT))]
-    IN = np.reshape(IN, (len(OUT), janela, 1))    
+    IN = data[range(janela*lin_x)]
+    IN = np.reshape(IN, (lin_x, janela, 1))    
     OUT_final = IN[:,-predictionPoints:,0]
     IN_final = IN[:,:-predictionPoints,:]
     return IN_final, OUT_final
