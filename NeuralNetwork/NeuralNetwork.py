@@ -40,12 +40,12 @@ def trainNeuralNetwork(trainDataForPrediction, trainDataTrueValues):
 
     return model
 
-def cria_IN_OUT(data, janela):
-    OUT_indices = np.arange(janela, len(data), janela)
+def cria_IN_OUT(data):
+    OUT_indices = np.arange(totalPoints, len(data), totalPoints)
     OUT = data[OUT_indices]
     lin_x = len(OUT)
-    IN = data[range(janela*lin_x)]
-    IN = np.reshape(IN, (lin_x, janela, 1))    
+    IN = data[range(totalPoints*lin_x)]
+    IN = np.reshape(IN, (lin_x, totalPoints, 1))    
     OUT_final = IN[:,-predictionPoints:,0]
     IN_final = IN[:,:-predictionPoints,:]
     return IN_final, OUT_final
@@ -102,11 +102,11 @@ def ApplyTraining(xlsx, regionName, model):
 
     trainData, testData, monthTrainData, monthTestData, split = splitSpeiData(xlsx)
 
-    trainDataForPrediction, trainDataTrueValues = cria_IN_OUT(trainData, totalPoints)
-    testDataForPrediction, testDataTrueValues = cria_IN_OUT(testData, totalPoints)
+    trainDataForPrediction, trainDataTrueValues = cria_IN_OUT(trainData)
+    testDataForPrediction, testDataTrueValues = cria_IN_OUT(testData)
 
-    trainMonthsForPrediction, trainMonthForPredictedValues = cria_IN_OUT(monthTrainData, totalPoints)
-    testMonthsForPrediction, testMonthForPredictedValues = cria_IN_OUT(monthTestData, totalPoints)
+    trainMonthsForPrediction, trainMonthForPredictedValues = cria_IN_OUT(monthTrainData)
+    testMonthsForPrediction, testMonthForPredictedValues = cria_IN_OUT(monthTestData)
 
     trainPredictValues = model.predict(trainDataForPrediction)
     testPredictValues = model.predict(testDataForPrediction)
