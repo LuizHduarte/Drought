@@ -98,15 +98,7 @@ def FitNeuralNetwork(xlsx, regionName):
 
     return model
 
-def ApplyTraining(xlsx, regionName, model):
-
-    trainData, testData, monthTrainData, monthTestData, split = splitSpeiData(xlsx)
-
-    trainDataForPrediction, trainDataTrueValues = cria_IN_OUT(trainData, totalPoints)
-    testDataForPrediction, testDataTrueValues = cria_IN_OUT(testData, totalPoints)
-
-    trainMonthsForPrediction, trainMonthForPredictedValues = cria_IN_OUT(monthTrainData, totalPoints)
-    testMonthsForPrediction, testMonthForPredictedValues = cria_IN_OUT(monthTestData, totalPoints)
+def ApplyTraining(xlsx, regionName, model, trainData, testData, monthTrainData, monthTestData, split, trainDataForPrediction, trainDataTrueValues, testDataForPrediction, testDataTrueValues, trainMonthsForPrediction, trainMonthForPredictedValues, testMonthsForPrediction, testMonthForPredictedValues):
 
     trainPredictValues = model.predict(trainDataForPrediction)
     testPredictValues = model.predict(testDataForPrediction)
