@@ -4,9 +4,8 @@ import numpy as np
 from NeuralNetwork.DataProcess import getMonthValues, getSpeiValues
 
 def showSpeiData(xlsx, test_data, split, regionName):
-    
-    monthValues = getMonthValues(xlsx)
-    speiValues, speiNormalizedValues =  getSpeiValues(xlsx)
+
+    speiValues, speiNormalizedValues, monthValues =  readXlsx(xlsx)
     
     plt.figure()
     plt.subplot(2,1,1)
@@ -25,8 +24,7 @@ def showSpeiData(xlsx, test_data, split, regionName):
 
 def showSpeiTest(xlsx, test_data, split, regionName):
     
-    monthValues = getMonthValues(xlsx)
-    speiValues, speiNormalizedValues =  getSpeiValues(xlsx)
+    speiValues, speiNormalizedValues, monthValues =  readXlsx(xlsx)
 
     positiveSpei = speiValues.copy()
     negativeSpei = speiValues.copy()
@@ -52,7 +50,7 @@ def showPredictionResults(trainDataTrueValues, testDataTrueValues, trainPredictV
 
     reshapedMonth = np.append(trainMonthForPredictedValues, testMonthForPredictedValues)
 
-    SpeiValues, SpeiNormalizedValues = getSpeiValues(xlsx)
+    SpeiValues, SpeiNormalizedValues, monthValues = readXlsx(xlsx)
 
     speiMaxValue = np.max(SpeiValues)
     speiMinValue = np.min(SpeiValues)
@@ -76,7 +74,7 @@ def showPredictionsDistribution(trainDataTrueValues, testDataTrueValues, trainPr
     trueValues = np.append(trainDataTrueValues, testDataTrueValues)
     predictions = np.append(trainPredictValues, testPredictValues)
 
-    SpeiValues, SpeiNormalizedValues = getSpeiValues(xlsx)
+    SpeiValues, SpeiNormalizedValues, monthValues = readXlsx(xlsx)
 
     speiMaxValue = np.max(SpeiValues)
     speiMinValue = np.min(SpeiValues)
