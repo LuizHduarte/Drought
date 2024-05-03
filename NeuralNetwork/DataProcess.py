@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import json
+from sklearn.model_selection import train_test_split
 
 with open("NeuralNetwork\config.json") as arquivo:
     dados_json = json.load(arquivo)
@@ -25,12 +26,7 @@ def splitSpeiData(xlsx):
     SpeiValues, SpeiNormalizedValues = getSpeiValues(df)
     monthValues = getMonthValues(df)
 
-    split= int(len(SpeiNormalizedValues)*parcelDataTrain)
-
-    speiTrainData = SpeiNormalizedValues[0:split]
-    speiTestData = SpeiNormalizedValues[split:]
-
-    monthTrainData = monthValues[0:split]
-    monthTestData = monthValues[split:]
-
+    speiTrainData, speiTestData, monthTrainData, monthTestData = train_test_split(SpeiNormalizedValues, monthValues, train_size=0.8, shuffle=False)
+    split = len(speiTrainData)
+    
     return speiTrainData, speiTestData, monthTrainData, monthTestData, split
