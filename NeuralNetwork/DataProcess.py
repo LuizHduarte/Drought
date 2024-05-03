@@ -26,7 +26,7 @@ def splitSpeiData(xlsx):
     SpeiValues, SpeiNormalizedValues = getSpeiValues(df)
     monthValues = getMonthValues(df)
 
-    speiTrainData, speiTestData, monthTrainData, monthTestData = train_test_split(SpeiNormalizedValues, monthValues, train_size=0.8, shuffle=False)
+    speiTrainData, speiTestData, monthTrainData, monthTestData = train_test_split(SpeiNormalizedValues, monthValues, train_size=parcelDataTrain, shuffle=False)
     split = len(speiTrainData)
     
     return speiTrainData, speiTestData, monthTrainData, monthTestData, split
