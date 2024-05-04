@@ -8,7 +8,7 @@ from NeuralNetwork.VisualRepresentation import showPredictionResults, showPredic
 from NeuralNetwork.Metrics import getError
 
 # Abra o arquivo JSON
-with open("NeuralNetwork\config.json") as arquivo:
+with open("./NeuralNetwork/modelConfig.json") as arquivo:
     dados_json = json.load(arquivo)
 
 totalPoints= dados_json['totalPoints']

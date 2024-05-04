@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import json
 
-with open("NeuralNetwork\config.json") as arquivo:
+with open("./NeuralNetwork/modelConfig.json") as arquivo:
     dados_json = json.load(arquivo)
 
 parcelDataTrain= dados_json['parcelDataTrain']
