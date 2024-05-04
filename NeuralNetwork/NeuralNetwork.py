@@ -27,7 +27,7 @@ def createNeuralNetwork(hidden_units, dense_units, input_shape, activation):
 
 def trainNeuralNetwork(trainDataForPrediction, trainDataTrueValues):
 
-    model = createNeuralNetwork( hidden_units= hiddenUnits, dense_units=predictionPoints, input_shape=(totalPoints-predictionPoints,1), activation=['relu','sigmoid'])
+    model = createNeuralNetwork( hidden_units= hiddenUnits, dense_units=predictionPoints, input_shape=(totalPoints-predictionPoints,1), activation=['relu','linear'])
     print(model.summary())
 
     #treina a rede e mostra o gráfico do loss
@@ -94,7 +94,7 @@ def FitNeuralNetwork(xlsx, regionName):
     showSpeiData(xlsx, testData, split, regionName)
     showSpeiTest(xlsx, testData, split, regionName)
     showPredictionResults(trainDataTrueValues, testDataTrueValues, trainPredictValues, testPredictValues, trainMonthForPredictedValues, testMonthForPredictedValues, xlsx)
-    #showPredictionsDistribution(trainDataTrueValues, testDataTrueValues, trainPredictValues, testPredictValues, xlsx)
+    showPredictionsDistribution(trainDataTrueValues, testDataTrueValues, trainPredictValues, testPredictValues, xlsx)
 
     return model
 

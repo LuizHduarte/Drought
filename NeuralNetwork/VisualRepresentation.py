@@ -5,7 +5,6 @@ from NeuralNetwork.DataProcess import readXlsx
 
 def showSpeiData(xlsx, test_data, split, regionName):
 
-    print("AAAAAAAAAAAAAAAA")
     speiValues, speiNormalizedValues, monthValues =  readXlsx(xlsx)
     
     
@@ -27,9 +26,6 @@ def showSpeiData(xlsx, test_data, split, regionName):
 def showSpeiTest(xlsx, test_data, split, regionName):
     
     speiValues, speiNormalizedValues, monthValues =  readXlsx(xlsx)
-
-    positiveSpei = speiValues.copy()
-    negativeSpei = speiValues.copy()
 
     y1positive=np.array(speiValues)>=0
     y1negative = np.array(speiValues)<=0
