@@ -5,7 +5,9 @@ from NeuralNetwork.DataProcess import readXlsx
 
 def showSpeiData(xlsx, test_data, split, regionName):
 
+    print("AAAAAAAAAAAAAAAA")
     speiValues, speiNormalizedValues, monthValues =  readXlsx(xlsx)
+    
     
     plt.figure()
     plt.subplot(2,1,1)
