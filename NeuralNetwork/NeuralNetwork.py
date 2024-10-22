@@ -50,7 +50,7 @@ def cria_IN_OUT(data, janela):
     IN_final = IN[:,:-predictionPoints,:]
     return IN_final, OUT_final
 
-def FitNeuralNetwork(xlsx, regionName):
+def UseNeuralNetwork(xlsx, regionName, model=None, training=True):
 
         #[0] = lista de dados do SPEI referentes à parcela de treinamento (80%)
         #[1] = lista de dados do SPEI referentes à parcela de teste (20%)
@@ -75,7 +75,8 @@ def FitNeuralNetwork(xlsx, regionName):
         #[1] = Dataset que contem a parcela dos meses nos quais os SPEIs serão preditos(teste)
     testMonthsForPrediction, testMonthForPredictedValues = cria_IN_OUT(monthTestData, totalPoints)
 
-    model = trainNeuralNetwork(trainDataForPrediction, trainDataTrueValues)
+    if training:
+        model = trainNeuralNetwork(trainDataForPrediction, trainDataTrueValues)
 
         #faz previsões e calcula os erros
     trainPredictValues = model.predict(trainDataForPrediction)
@@ -92,38 +93,11 @@ def FitNeuralNetwork(xlsx, regionName):
     print(testErrors)
 
     showSpeiData(xlsx, testData, split, regionName)
-    showSpeiTest(xlsx, testData, split, regionName)
+    
+    if training:
+        showSpeiTest(xlsx, testData, split, regionName)
+        
     showPredictionResults(trainDataTrueValues, testDataTrueValues, trainPredictValues, testPredictValues, trainMonthForPredictedValues, testMonthForPredictedValues, xlsx)
     showPredictionsDistribution(trainDataTrueValues, testDataTrueValues, trainPredictValues, testPredictValues, xlsx)
 
     return model
-
-def ApplyTraining(xlsx, regionName, model):
-
-    trainData, testData, monthTrainData, monthTestData, split = splitSpeiData(xlsx)
-
-    trainDataForPrediction, trainDataTrueValues = cria_IN_OUT(trainData, totalPoints)
-    testDataForPrediction, testDataTrueValues = cria_IN_OUT(testData, totalPoints)
-
-    trainMonthsForPrediction, trainMonthForPredictedValues = cria_IN_OUT(monthTrainData, totalPoints)
-    testMonthsForPrediction, testMonthForPredictedValues = cria_IN_OUT(monthTestData, totalPoints)
-
-    trainPredictValues = model.predict(trainDataForPrediction)
-    testPredictValues = model.predict(testDataForPrediction)
-
-    trainErrors = getError(trainDataTrueValues, trainPredictValues)
-    testErrors = getError(testDataTrueValues, testPredictValues)
-
-    print("--------------Result for " +  regionName + "---------------")
-    print("---------------------Train-----------------------")
-    print(trainErrors)
-
-    print("---------------------Test------------------------")
-    print(testErrors)
-
-    showSpeiData(xlsx, testData, split, regionName)
-    showPredictionResults(trainDataTrueValues, testDataTrueValues, trainPredictValues, testPredictValues, trainMonthForPredictedValues, testMonthForPredictedValues, xlsx)
-    showPredictionsDistribution(trainDataTrueValues, testDataTrueValues, trainPredictValues, testPredictValues, xlsx)
-
-
-
