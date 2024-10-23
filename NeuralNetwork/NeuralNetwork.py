@@ -18,7 +18,8 @@ hiddenUnits = dados_json['hiddenUnits']
 
 def createNeuralNetwork(hidden_units, dense_units, input_shape, activation):
     model = tf.keras.Sequential()   
-    model.add(tf.keras.layers.LSTM(hidden_units,input_shape=input_shape,activation=activation[0]))
+    model.add(tf.keras.Input(shape=input_shape))
+    model.add(tf.keras.layers.LSTM(hidden_units,activation=activation[0]))
     model.add(tf.keras.layers.Dense(units=dense_units,activation=activation[1]))
     model.add(tf.keras.layers.Dense(units=dense_units,activation=activation[1]))
     model.add(tf.keras.layers.Dense(units=dense_units,activation=activation[1]))
