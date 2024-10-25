@@ -26,7 +26,6 @@ def createNeuralNetwork(hidden_units, dense_units, input_shape, activation):
     return model
 
 def trainNeuralNetwork(trainDataForPrediction, trainDataTrueValues):
-
     model = createNeuralNetwork( hidden_units= hiddenUnits, dense_units=predictionPoints, input_shape=(totalPoints-predictionPoints,1), activation=['relu','linear'])
     print(model.summary())
 
@@ -51,7 +50,6 @@ def cria_IN_OUT(data, janela):
     return IN_final, OUT_final
 
 def UseNeuralNetwork(xlsx, regionName, model=None, training=True):
-
         #[0] = lista de dados do SPEI referentes à parcela de treinamento (80%)
         #[1] = lista de dados do SPEI referentes à parcela de teste (20%)
         #[2] = lista de datas referentes à parcela de treinamento (80%)
@@ -59,25 +57,17 @@ def UseNeuralNetwork(xlsx, regionName, model=None, training=True):
         #[4] = valor inteiro da posição que o dataset foi splitado
     trainData, testData, monthTrainData, monthTestData, split = splitSpeiData(xlsx)
 
-        # Dataset que contém a parcela de dados que será utilizadda para...
-        #[0] = ... alimentar a predição da rede(treinamento)
-        #[1] = ... validar se as predições da rede estão corretas(treinamento)
-    trainDataForPrediction, trainDataTrueValues = cria_IN_OUT(trainData, totalPoints)
-
-        # Dataset que contém a parcela de dados que será utilizadda para...
-        #[0] = ... alimentar a predição da rede(teste)
-        #[1] = ... validar se as predições da rede estão corretas(teste)
-    testDataForPrediction, testDataTrueValues = cria_IN_OUT(testData, totalPoints)
+        # Dataset que contém a parcela de dados que será utilizada para...
+        #[0] = ... alimentar a predição da rede
+        #[1] = ... validar se as predições da rede estão corretas
+    trainDataForPrediction, trainDataTrueValues = cria_IN_OUT(trainData, totalPoints) # Treinamento
+    testDataForPrediction , testDataTrueValues  = cria_IN_OUT(testData , totalPoints) # Teste
 
         # Dataset que contém a parcela dos meses nos quais...
-        #[0] = ... os SPEIs foram utilizados para alimentar a predição da rede(treinamento)
-        #[1] = ... os SPEIs foram preditos(treinamento)
-    trainMonthsForPrediction, trainMonthForPredictedValues = cria_IN_OUT(monthTrainData, totalPoints)
-
-        # Dataset que contém a parcela dos meses nos quais...
-        #[0] = ... os SPEIs foram utilizados para alimentar a predição da rede(teste)
-        #[1] = ... os SPEIs foram preditos(teste)
-    testMonthsForPrediction, testMonthForPredictedValues = cria_IN_OUT(monthTestData, totalPoints)
+        #[0] = ... os SPEIs foram utilizados para alimentar a predição da rede
+        #[1] = ... os SPEIs foram preditos
+    trainMonthsForPrediction, trainMonthForPredictedValues = cria_IN_OUT(monthTrainData, totalPoints) # Treinamento
+    testMonthsForPrediction , testMonthForPredictedValues  = cria_IN_OUT(monthTestData , totalPoints) # Teste
 
     if training:
         model = trainNeuralNetwork(trainDataForPrediction, trainDataTrueValues)
