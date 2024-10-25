@@ -69,12 +69,12 @@ def UseNeuralNetwork(xlsx, regionName, model=None, training=True):
         #[1] = ... validar se as predições da rede estão corretas(teste)
     testDataForPrediction, testDataTrueValues = cria_IN_OUT(testData, totalPoints)
 
-        # Dataset que contém a parcela dos mses nos quais...
+        # Dataset que contém a parcela dos meses nos quais...
         #[0] = ... os SPEIs foram utilizados para alimentar a predição da rede(treinamento)
         #[1] = ... os SPEIs foram preditos(treinamento)
     trainMonthsForPrediction, trainMonthForPredictedValues = cria_IN_OUT(monthTrainData, totalPoints)
 
-        # Dataset que contém a parcela dos mses nos quais...
+        # Dataset que contém a parcela dos meses nos quais...
         #[0] = ... os SPEIs foram utilizados para alimentar a predição da rede(teste)
         #[1] = ... os SPEIs foram preditos(teste)
     testMonthsForPrediction, testMonthForPredictedValues = cria_IN_OUT(monthTestData, totalPoints)
