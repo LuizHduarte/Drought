@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import json
 
-from NeuralNetwork.DataProcess import splitSpeiData
+from NeuralNetwork.DataProcess import splitSpeiData, cria_IN_OUT
 from NeuralNetwork.VisualRepresentation import showPredictionResults, showPredictionsDistribution, showSpeiData, showSpeiTest
 from NeuralNetwork.Metrics import getError
 
@@ -39,16 +39,6 @@ def trainNeuralNetwork(trainDataForPrediction, trainDataTrueValues):
     plt.show()
 
     return model
-
-def cria_IN_OUT(data, janela):
-    OUT_indices = np.arange(janela, len(data), janela)
-    OUT = data[OUT_indices]
-    lin_x = len(OUT)
-    IN = data[range(janela*lin_x)]
-    IN = np.reshape(IN, (lin_x, janela, 1))    
-    OUT_final = IN[:,-predictionPoints:,0]
-    IN_final = IN[:,:-predictionPoints,:]
-    return IN_final, OUT_final
 
 def UseNeuralNetwork(xlsx, regionName, model=None, training=True):
         #[0] = lista de dados do SPEI referentes à parcela de treinamento (80%)
