@@ -41,24 +41,19 @@ def trainNeuralNetwork(trainDataForPrediction, trainDataTrueValues):
     return model
 
 def UseNeuralNetwork(xlsx, regionName, model=None, training=True):
-        #[0] = lista de dados do SPEI referentes à parcela de treinamento (80%)
-        #[1] = lista de dados do SPEI referentes à parcela de teste (20%)
-        #[2] = lista de datas referentes à parcela de treinamento (80%)
-        #[3] = lista de datas referentes à parcela de teste (20%)
-        #[4] = valor inteiro da posição que o dataset foi splitado
-    trainData, testData, monthTrainData, monthTestData, split = splitSpeiData(xlsx)
+    SPEI_dict, months_dict, split = splitSpeiData(xlsx)
 
         # Dataset que contém a parcela de dados que será utilizada para...
         #[0] = ... alimentar a predição da rede
         #[1] = ... validar se as predições da rede estão corretas
-    trainDataForPrediction, trainDataTrueValues = cria_IN_OUT(trainData, totalPoints) # Treinamento
-    testDataForPrediction , testDataTrueValues  = cria_IN_OUT(testData , totalPoints) # Teste
+    trainDataForPrediction, trainDataTrueValues = cria_IN_OUT(SPEI_dict['Train'], totalPoints) # Treinamento
+    testDataForPrediction , testDataTrueValues  = cria_IN_OUT(SPEI_dict['Test'] , totalPoints) # Teste
 
         # Dataset que contém a parcela dos meses nos quais...
         #[0] = ... os SPEIs foram utilizados para alimentar a predição da rede
         #[1] = ... os SPEIs foram preditos
-    trainMonthsForPrediction, trainMonthForPredictedValues = cria_IN_OUT(monthTrainData, totalPoints) # Treinamento
-    testMonthsForPrediction , testMonthForPredictedValues  = cria_IN_OUT(monthTestData , totalPoints) # Teste
+    trainMonthsForPrediction, trainMonthForPredictedValues = cria_IN_OUT(months_dict['Train'], totalPoints) # Treinamento
+    testMonthsForPrediction , testMonthForPredictedValues  = cria_IN_OUT(months_dict['Test'] , totalPoints) # Teste
 
     if training:
         model = trainNeuralNetwork(trainDataForPrediction, trainDataTrueValues)
@@ -77,10 +72,10 @@ def UseNeuralNetwork(xlsx, regionName, model=None, training=True):
     print("---------------------Test------------------------")
     print(testErrors)
 
-    showSpeiData(xlsx, testData, split, regionName)
+    showSpeiData(xlsx, SPEI_dict['Test'], split, regionName)
     
     if training:
-        showSpeiTest(xlsx, testData, split, regionName)
+        showSpeiTest(xlsx, SPEI_dict['Test'], split, regionName)
         
     showPredictionResults(trainDataTrueValues, testDataTrueValues, trainPredictValues, testPredictValues, trainMonthForPredictedValues, testMonthForPredictedValues, xlsx)
     showPredictionsDistribution(trainDataTrueValues, testDataTrueValues, trainPredictValues, testPredictValues, xlsx)
