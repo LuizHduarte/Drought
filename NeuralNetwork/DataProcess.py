@@ -23,10 +23,13 @@ def splitSpeiData(xlsx):
     
     SpeiValues, SpeiNormalizedValues, monthValues = readXlsx(xlsx)
 
-    speiTrainData, speiTestData, monthTrainData, monthTestData = train_test_split(SpeiNormalizedValues, monthValues, train_size=parcelDataTrain, shuffle=False)
-    split = len(speiTrainData)
+    SPEI_dict   = {'Train': None, 'Test': None}
+    months_dict = {'Train': None, 'Test': None}
     
-    return speiTrainData, speiTestData, monthTrainData, monthTestData, split
+    SPEI_dict['Train'], SPEI_dict['Test'], months_dict['Train'], months_dict['Test']  = train_test_split(SpeiNormalizedValues, monthValues, train_size=parcelDataTrain, shuffle=False)
+    split = len(SPEI_dict['Train'])
+    
+    return SPEI_dict, months_dict, split
 
 def cria_IN_OUT(data, janela):
     OUT_indices = np.arange(janela, len(data), janela)
