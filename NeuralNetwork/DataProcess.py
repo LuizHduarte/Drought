@@ -23,9 +23,9 @@ def splitSpeiData(xlsx):
     
     SpeiValues, SpeiNormalizedValues, monthValues = readXlsx(xlsx)
 
-    data_types_list = ['Train', 'Test']
-    SPEI_dict       = dict.fromkeys(data_types_list)
-    months_dict     = dict.fromkeys(data_types_list)
+    DATA_TYPES_LIST = ['Train', 'Test']
+    SPEI_dict       = dict.fromkeys(DATA_TYPES_LIST)
+    months_dict     = dict.fromkeys(DATA_TYPES_LIST)
     
     SPEI_dict['Train'], SPEI_dict['Test'], months_dict['Train'], months_dict['Test']  = train_test_split(SpeiNormalizedValues, monthValues, train_size=parcelDataTrain, shuffle=False)
     split = len(SPEI_dict['Train'])
