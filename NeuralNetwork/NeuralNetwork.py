@@ -49,14 +49,14 @@ def UseNeuralNetwork(xlsx, regionName, model=None, training=True):
     if training:
         model = trainNeuralNetwork(dataForPrediction_dict['Train'], dataTrueValues_dict['Train'])
 
-    predictValues_dict = {'Train': model.predict(dataForPrediction_dict['Train'],
-                          'Test' : model.predict(dataForPrediction_dict['Test']
+    predictValues_dict = {'Train': model.predict(dataForPrediction_dict['Train']),
+                          'Test' : model.predict(dataForPrediction_dict['Test'])
                          }
 
     print(f'--------------Result for {regionName}---------------')
     for train_or_test in ['Train', 'Test']:
         print(f'---------------------{train_or_test}-----------------------')
-        print(getError(dataTrueValues_dict[train_or_test], predictValues_dict[train_or_test])
+        print(getError(dataTrueValues_dict[train_or_test], predictValues_dict[train_or_test]))
 
     showSpeiData(xlsx, SPEI_dict['Test'], split, regionName)  
     if training:
