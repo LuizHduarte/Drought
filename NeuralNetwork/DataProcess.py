@@ -48,4 +48,3 @@ def cria_IN_OUT(data_dict, janela):
         IN_final_dict [train_or_test] = IN[:,:-predictionPoints,:]
     
     return IN_final_dict, OUT_final_dict
-    #return IN_final_dict['Train'], OUT_final_dict['Train'], IN_final_dict['Test'], OUT_final_dict['Test']

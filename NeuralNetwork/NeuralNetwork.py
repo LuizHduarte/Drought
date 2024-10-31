@@ -43,32 +43,26 @@ def UseNeuralNetwork(xlsx, regionName, model=None, training=True):
     SPEI_dict, months_dict, split = splitSpeiData(xlsx) #(SPEI/months)_dict.keys() = ['Train', 'Test']
 
     #         IN            ,           OUT          : 
-    dataForPrediction_dict  , dataTrueValues_dict    = cria_IN_OUT(SPEI_dict, totalPoints)
+    dataForPrediction_dict  , dataTrueValues_dict    = cria_IN_OUT(SPEI_dict  , totalPoints)
     monthsForPrediction_dict, monthForPredicted_dict = cria_IN_OUT(months_dict, totalPoints)
     
     if training:
         model = trainNeuralNetwork(dataForPrediction_dict['Train'], dataTrueValues_dict['Train'])
 
-        #faz previsões e calcula os erros
-    trainPredictValues = model.predict(dataForPrediction_dict['Train'])
-    testPredictValues  = model.predict(dataForPrediction_dict['Test'] )
+    predictValues_dict = {'Train': model.predict(dataForPrediction_dict['Train'],
+                          'Test' : model.predict(dataForPrediction_dict['Test']
+                         }
 
-    trainErrors = getError(dataTrueValues_dict['Train'], trainPredictValues)
-    testErrors  = getError(dataTrueValues_dict['Test'] ,  testPredictValues)
+    print(f'--------------Result for {regionName}---------------')
+    for train_or_test in ['Train', 'Test']:
+        print(f'---------------------{train_or_test}-----------------------')
+        print(getError(dataTrueValues_dict[train_or_test], predictValues_dict[train_or_test])
 
-    print("--------------Result for " + regionName +"---------------")
-    print("---------------------Train-----------------------")
-    print(trainErrors)
-
-    print("---------------------Test------------------------")
-    print(testErrors)
-
-    showSpeiData(xlsx, SPEI_dict['Test'], split, regionName)
-    
+    showSpeiData(xlsx, SPEI_dict['Test'], split, regionName)  
     if training:
         showSpeiTest(xlsx, SPEI_dict['Test'], split, regionName)
         
-    showPredictionResults(dataTrueValues_dict['Train'], dataTrueValues_dict['Test'], trainPredictValues, testPredictValues, monthForPredicted_dict['Train'], monthForPredicted_dict['Test'], xlsx)
-    showPredictionsDistribution(dataTrueValues_dict['Train'], dataTrueValues_dict['Test'], trainPredictValues, testPredictValues, xlsx)
+    showPredictionResults(dataTrueValues_dict, predictValues_dict, monthForPredicted_dict, xlsx)
+    showPredictionsDistribution(dataTrueValues_dict, predictValues_dict, xlsx)
 
     return model
