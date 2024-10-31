@@ -4,9 +4,7 @@ import numpy as np
 from NeuralNetwork.DataProcess import readXlsx
 
 def showSpeiData(xlsx, test_data, split, regionName):
-
     speiValues, speiNormalizedValues, monthValues =  readXlsx(xlsx)
-    
     
     plt.figure()
     plt.subplot(2,1,1)
@@ -24,7 +22,6 @@ def showSpeiData(xlsx, test_data, split, regionName):
     plt.legend()
 
 def showSpeiTest(xlsx, test_data, split, regionName):
-    
     speiValues, speiNormalizedValues, monthValues =  readXlsx(xlsx)
 
     y1positive=np.array(speiValues)>=0
@@ -41,12 +38,11 @@ def showSpeiTest(xlsx, test_data, split, regionName):
     plt.legend()
     plt.show()
 
-def showPredictionResults(trainDataTrueValues, testDataTrueValues, trainPredictValues, testPredictValues, trainMonthForPredictedValues, testMonthForPredictedValues, xlsx):
+def showPredictionResults(dataTrueValues_dict, predictValues_dict, monthForPredicted_dict, xlsx):
+    trueValues  = np.append(dataTrueValues_dict['Train'], dataTrueValues_dict['Test'])
+    predictions = np.append( predictValues_dict['Train'],  predictValues_dict['Test'])
 
-    trueValues = np.append(trainDataTrueValues, testDataTrueValues)
-    predictions = np.append(trainPredictValues, testPredictValues)
-
-    reshapedMonth = np.append(trainMonthForPredictedValues, testMonthForPredictedValues)
+    reshapedMonth = np.append(monthForPredicted_dict['Train'], monthForPredicted_dict['Test'])
 
     SpeiValues, SpeiNormalizedValues, monthValues = readXlsx(xlsx)
 
@@ -59,18 +55,16 @@ def showPredictionResults(trainDataTrueValues, testDataTrueValues, trainPredictV
     plt.figure()
     plt.plot(reshapedMonth,trueValues_denormalized)
     plt.plot(reshapedMonth,predictions_denormalized)
-    plt.axvline(trainMonthForPredictedValues[-1][-1], color='r')
+    plt.axvline(monthForPredicted_dict['Train'][-1][-1], color='r')
     plt.legend(['Verdadeiros', 'Previstos'])
     plt.xlabel('Data')
     plt.ylabel('SPEI')
     plt.title('Valores verdadeiros e previstos para o final das séries.')
     plt.show()
-   
 
-def showPredictionsDistribution(trainDataTrueValues, testDataTrueValues, trainPredictValues, testPredictValues, xlsx):
-
-    trueValues = np.append(trainDataTrueValues, testDataTrueValues)
-    predictions = np.append(trainPredictValues, testPredictValues)
+def showPredictionsDistribution(dataTrueValues_dict, predictValues_dict, xlsx):
+    trueValues  = np.append(dataTrueValues_dict['Train'], dataTrueValues_dict['Test'])
+    predictions = np.append( predictValues_dict['Train'],  predictValues_dict['Test'])
 
     SpeiValues, SpeiNormalizedValues, monthValues = readXlsx(xlsx)
 
