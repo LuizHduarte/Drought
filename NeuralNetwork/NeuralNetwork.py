@@ -1,5 +1,4 @@
 import tensorflow as tf
-import numpy as np
 import matplotlib.pyplot as plt
 import json
 
@@ -41,29 +40,28 @@ def trainNeuralNetwork(trainDataForPrediction, trainDataTrueValues):
     return model
 
 def UseNeuralNetwork(xlsx, regionName, model=None, training=True):
+    
+    # SPEI_dict  .keys() = ['Train', 'Test']
+    # months_dict.keys() = ['Train', 'Test']
     SPEI_dict, months_dict, split = splitSpeiData(xlsx)
 
-        # Dataset que contém a parcela de dados que será utilizada para...
-        #[0] = ... alimentar a predição da rede
-        #[1] = ... validar se as predições da rede estão corretas
-    trainDataForPrediction, trainDataTrueValues = cria_IN_OUT(SPEI_dict['Train'], totalPoints) # Treinamento
-    testDataForPrediction , testDataTrueValues  = cria_IN_OUT(SPEI_dict['Test'] , totalPoints) # Teste
-
-        # Dataset que contém a parcela dos meses nos quais...
-        #[0] = ... os SPEIs foram utilizados para alimentar a predição da rede
-        #[1] = ... os SPEIs foram preditos
-    trainMonthsForPrediction, trainMonthForPredictedValues = cria_IN_OUT(months_dict['Train'], totalPoints) # Treinamento
-    testMonthsForPrediction , testMonthForPredictedValues  = cria_IN_OUT(months_dict['Test'] , totalPoints) # Teste
+    # IN : "(train, test)DataForPrediction": alimentar a predição da rede
+    # OUT: "(train, test)DataTrueValues"   : validar se as predições da rede estão corretas
+    trainDataForPrediction, trainDataTrueValues, testDataForPrediction, testDataTrueValues = cria_IN_OUT(SPEI_dict, totalPoints) # trainData_dict (to-do)
+    
+    # IN : "(train, test)MonthsForPrediction"    : os SPEIs foram utilizados para alimentar a predição da rede
+    # OUT: "(train, test)MonthForPredictedValues": os SPEIs foram preditos
+    trainMonthsForPrediction, trainMonthForPredictedValues, testMonthsForPrediction, testMonthForPredictedValues = cria_IN_OUT(months_dict, totalPoints) # trainMonths_dict (to-do)
 
     if training:
         model = trainNeuralNetwork(trainDataForPrediction, trainDataTrueValues)
 
         #faz previsões e calcula os erros
     trainPredictValues = model.predict(trainDataForPrediction)
-    testPredictValues = model.predict(testDataForPrediction)
+    testPredictValues  = model.predict(testDataForPrediction)
 
     trainErrors = getError(trainDataTrueValues, trainPredictValues)
-    testErrors = getError(testDataTrueValues, testPredictValues)
+    testErrors  = getError(testDataTrueValues, testPredictValues)
 
     print("--------------Result for " + regionName +"---------------")
     print("---------------------Train-----------------------")
