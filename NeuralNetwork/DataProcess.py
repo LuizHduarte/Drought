@@ -1,8 +1,7 @@
 import pandas as pd
 import numpy as np
 import json
-from sklearn.model_selection import train_test_split
-import pprint 
+from sklearn.model_selection import train_test_split 
 
 with open("./NeuralNetwork/modelConfig.json") as arquivo:
     dados_json = json.load(arquivo)
@@ -14,9 +13,9 @@ def readXlsx(xlsx):
     df = pd.read_excel(xlsx)
     df.columns = df.columns.str.replace(' ', '')
 
-    SpeiValues = df["Series1"].to_numpy()
+    SpeiValues           = df["Series1"].to_numpy()
     SpeiNormalizedValues = (SpeiValues-np.min(SpeiValues))/(np.max(SpeiValues)-np.min(SpeiValues))
-    monthValues = df["Data"].to_numpy()
+    monthValues          = df["Data"].to_numpy()
 
     return SpeiValues, SpeiNormalizedValues, monthValues
 
@@ -48,4 +47,5 @@ def cria_IN_OUT(data_dict, janela):
         OUT_final_dict[train_or_test] = IN[:,-predictionPoints:,0]
         IN_final_dict [train_or_test] = IN[:,:-predictionPoints,:]
     
-    return IN_final_dict['Train'], OUT_final_dict['Train'], IN_final_dict['Test'], OUT_final_dict['Test']
+    return IN_final_dict, OUT_final_dict
+    #return IN_final_dict['Train'], OUT_final_dict['Train'], IN_final_dict['Test'], OUT_final_dict['Test']
