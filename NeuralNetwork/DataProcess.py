@@ -6,34 +6,35 @@ from sklearn.model_selection import train_test_split
 with open("./NeuralNetwork/modelConfig.json") as arquivo:
     dados_json = json.load(arquivo)
 
-parcelDataTrain  = dados_json['parcelDataTrain']
-predictionPoints = dados_json['predictionPoints']
+PARCEL_DATA_TRAIN = dados_json['parcelDataTrain' ]
+PREDICTION_POINTS = dados_json['predictionPoints']
 
-def readXlsx(xlsx):
-    df = pd.read_excel(xlsx)
+def readXlsx(XLSX):
+    df = pd.read_excel(XLSX)
     df.columns = df.columns.str.replace(' ', '')
 
-    SpeiValues = df["Series1"].to_numpy()
-    SpeiNormalizedValues = (SpeiValues-np.min(SpeiValues))/(np.max(SpeiValues)-np.min(SpeiValues))
-    monthValues = df["Data"].to_numpy()
+    SPEI_VALUES  = df['Series1'].to_numpy()
+    MONTH_VALUES = df['Data'   ].to_numpy()
 
-    return SpeiValues, SpeiNormalizedValues, monthValues
+    SPEI_NORMALIZED_VALUES = (SPEI_VALUES-np.min(SPEI_VALUES))/(np.max(SPEI_VALUES)-np.min(SPEI_VALUES))
 
-def splitSpeiData(xlsx):
+    return SPEI_VALUES, SPEI_NORMALIZED_VALUES, MONTH_VALUES
+
+def splitSpeiData(XLSX): 
+    SPEI_VALUES, SPEI_NORMALIZED_VALUES, MONTH_VALUES = readXLSX(XLSX)
+
+    SPEI_TRAIN_DATA, SPEI_TEST_DATA, MONTH_TRAIN_DATA, MONTH_TEST_DATA = train_test_split(SPEI_NORMALIZED_VALUES, MONTH_VALUES, train_size=PARCEL_DATA_TRAIN, shuffle=False)
+    split = len(SPEI_TRAIN_DATA)
     
-    SpeiValues, SpeiNormalizedValues, monthValues = readXlsx(xlsx)
+    return SPEI_TRAIN_DATA, SPEI_TEST_DATA, MONTH_TRAIN_DATA, MONTH_TEST_DATA, split
 
-    speiTrainData, speiTestData, monthTrainData, monthTestData = train_test_split(SpeiNormalizedValues, monthValues, train_size=parcelDataTrain, shuffle=False)
-    split = len(speiTrainData)
+def cria_IN_OUT(data, WINDOW_SIZE):
+    NUM_WINDOWS = len(data)//WINDOW_SIZE
     
-    return speiTrainData, speiTestData, monthTrainData, monthTestData, split
+    data        = data[:(WINDOW_SIZE * NUM_WINDOWS)]
+    data        = np.reshape(data, (NUM_WINDOWS, WINDOW_SIZE, 1))    
 
-def cria_IN_OUT(data, janela):
-    OUT_indices = np.arange(janela, len(data), janela)
-    OUT = data[OUT_indices]
-    lin_x = len(OUT)
-    IN = data[range(janela*lin_x)]
-    IN = np.reshape(IN, (lin_x, janela, 1))    
-    OUT_final = IN[:,-predictionPoints:,0]
-    IN_final = IN[:,:-predictionPoints,:]
-    return IN_final, OUT_final
+    INPUT       = data[:,:-PREDICTION_POINTS,:]
+    OUTPUT      = data[:,-PREDICTION_POINTS:,0]
+    
+    return INPUT, OUTPUT
