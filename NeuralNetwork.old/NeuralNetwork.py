@@ -8,37 +8,37 @@ from NeuralNetwork.VisualRepresentation import showPredictionResults, showPredic
 from NeuralNetwork.Metrics import getError
 
 # Abra o arquivo JSON
-with open("./NeuralNetwork/modelConfig.json") as arquivo:
-    dados_json = json.load(arquivo)
+# with open("./NeuralNetwork/modelConfig.json") as arquivo:
+#     dados_json = json.load(arquivo)
 
-totalPoints= dados_json['totalPoints']
-predictionPoints= dados_json['predictionPoints']
-numberOfEpochs = dados_json['numberOfEpochs']
-hiddenUnits = dados_json['hiddenUnits']
+# totalPoints= dados_json['totalPoints']
+# predictionPoints= dados_json['predictionPoints']
+# numberOfEpochs = dados_json['numberOfEpochs']
+# hiddenUnits = dados_json['hiddenUnits']
 
-def createNeuralNetwork(hidden_units, dense_units, input_shape, activation):
-    model = tf.keras.Sequential()   
-    model.add(tf.keras.Input(shape=input_shape))
-    model.add(tf.keras.layers.LSTM(hidden_units,activation=activation[0]))
-    model.add(tf.keras.layers.Dense(units=dense_units,activation=activation[1]))
-    model.add(tf.keras.layers.Dense(units=dense_units,activation=activation[1]))
-    model.add(tf.keras.layers.Dense(units=dense_units,activation=activation[1]))
-    model.compile(loss='mean_squared_error', optimizer='adam')
-    return model
+# def createNeuralNetwork(hidden_units, dense_units, input_shape, activation):
+#     model = tf.keras.Sequential()   
+#     model.add(tf.keras.Input(shape=input_shape))
+#     model.add(tf.keras.layers.LSTM(hidden_units,activation=activation[0]))
+#     model.add(tf.keras.layers.Dense(units=dense_units,activation=activation[1]))
+#     model.add(tf.keras.layers.Dense(units=dense_units,activation=activation[1]))
+#     model.add(tf.keras.layers.Dense(units=dense_units,activation=activation[1]))
+#     model.compile(loss='mean_squared_error', optimizer='adam')
+#     return model
 
-def trainNeuralNetwork(trainDataForPrediction, trainDataTrueValues):
-    model = createNeuralNetwork( hidden_units= hiddenUnits, dense_units=predictionPoints, input_shape=(totalPoints-predictionPoints,1), activation=['relu','linear'])
-    print(model.summary())
+# def trainNeuralNetwork(trainDataForPrediction, trainDataTrueValues):
+    # model = createNeuralNetwork( hidden_units= hiddenUnits, dense_units=predictionPoints, input_shape=(totalPoints-predictionPoints,1), activation=['relu','linear'])
+    # print(model.summary())
 
-    #treina a rede e mostra o gráfico do loss
-    history=model.fit(trainDataForPrediction, trainDataTrueValues, epochs=numberOfEpochs, batch_size=1, verbose=0)
-    plt.figure()
-    plt.plot(history.history['loss'],'k')
-    plt.ylabel('Mean Squared Error (MSE)')
-    plt.legend(['loss'])
-    plt.show()
+    # #treina a rede e mostra o gráfico do loss
+    # history=model.fit(trainDataForPrediction, trainDataTrueValues, epochs=numberOfEpochs, batch_size=1, verbose=0)
+    # plt.figure()
+    # plt.plot(history.history['loss'],'k')
+    # plt.ylabel('Mean Squared Error (MSE)')
+    # plt.legend(['loss'])
+    # plt.show()
 
-    return model
+    # return model
 
 def UseNeuralNetwork(xlsx, regionName, model=None, training=True):
         #[0] = lista de dados do SPEI referentes à parcela de treinamento (80%)
