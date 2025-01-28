@@ -1,9 +1,15 @@
 from classes import Dataset, DataProcessor, NeuralNetwork
 
-dataset_rio_pardo_de_mg = Dataset      ('./Data/', 'spei12_riopardodeminas.xlsx')
+rio_pardo_de_mg_dataset = Dataset      ('./Data/', 'spei12_riopardodeminas.xlsx')
+df_rio_pardo_de_mg      = rio_pardo_de_mg_dataset.df
+#rio_pardo_de_mg_months  = dataset_rio_pardo_de_mg.get_months()
+rio_pardo_de_mg_spei    = rio_pardo_de_mg_dataset.get_spei()
+rio_pardo_de_mg_spei_n  = rio_pardo_de_mg_dataset.get_spei_normalized()
+
 data_processor          = DataProcessor('config.json')
-model_rio_pardo_de_mg   = NeuralNetwork('config.json', data_processor, dataset_rio_pardo_de_mg)
-model_rio_pardo_de_mg.apply_ml_model   ()
+rio_pardo_de_mg_model   = NeuralNetwork('config.json', data_processor, rio_pardo_de_mg_dataset)
+(rio_pardo_de_mg_predicted_spei_normalized_train,
+ rio_pardo_de_mg_model_predicted_spei_normalized_test) = rio_pardo_de_mg_model.apply_ml_model()
 
 #model = UseNeuralNetwork('./Data/spei12_riopardodeminas.xlsx', "Rio Pardo", training=True)
 #UseNeuralNetwork("./Data/spei12_FranciscoSá.xlsx", "Francisco Sá", model, training=False)
