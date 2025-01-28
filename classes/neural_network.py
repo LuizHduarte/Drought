@@ -42,31 +42,6 @@ class NeuralNetwork:
         
         return model
     
-    def _prepare_data_for_use(self):
-            #[0] = lista de dados do SPEI referentes à parcela de treinamento (80%)
-            #[1] = lista de dados do SPEI referentes à parcela de teste (20%)
-            #[2] = lista de datas referentes à parcela de treinamento (80%)
-            #[3] = lista de datas referentes à parcela de teste (20%)
-            #[4] = valor inteiro da posição que o dataset foi splitado
-        trainData, testData, monthTrainData, monthTestData, split = self.data_processor.splitSpeiData(self.training_data, self.configs_dict['parcelDataTrain'])        
-        
-        return trainData, testData, monthTrainData, monthTestData, split
-    
-    def _create_io_datasets(self, trainData, testData, monthTrainData, monthTestData):
-            # Dataset que contém a parcela de dados que será utilizada para...
-            #[0] = ... alimentar a predição da rede
-            #[1] = ... validar se as predições da rede estão corretas
-        trainDataForPrediction, trainDataTrueValues = self.data_processor.cria_IN_OUT(trainData, self.configs_dict['total_points']) # Treinamento
-        testDataForPrediction , testDataTrueValues  = self.data_processor.cria_IN_OUT(testData , self.configs_dict['total_points']) # Teste
-    
-            # Dataset que contém a parcela dos meses nos quais...
-            #[0] = ... os SPEIs foram utilizados para alimentar a predição da rede
-            #[1] = ... os SPEIs foram preditos
-        trainMonthsForPrediction, trainMonthForPredictedValues = self.data_processor.cria_IN_OUT(monthTrainData, self.configs_dict['total_points']) # Treinamento
-        testMonthsForPrediction , testMonthForPredictedValues  = self.data_processor.cria_IN_OUT(monthTestData , self.configs_dict['total_points']) # Teste
-
-        return trainDataForPrediction, trainDataTrueValues, testDataForPrediction, testDataTrueValues, trainMonthsForPrediction, trainMonthForPredictedValues, testMonthsForPrediction, testMonthForPredictedValues
-    
     def train_ml_model(self):
         print('Started: training of ML model')
         (     trainData,      testData,
@@ -78,22 +53,24 @@ class NeuralNetwork:
         self._print_loss_chart(history)
         print('Ended: training of ML model')
 
+    def _make_predictions(self, trainDataForPrediction, testDataForPrediction):
+        trainPredictValues = self.model.predict(trainDataForPrediction)
+        testPredictValues  = self.model.predict(testDataForPrediction)
+        
+        print(f'trainPredictValues: {trainPredictValues}')
+        print(f'testPredictValues : {testPredictValues} ')
+
     def apply_ml_model(self):
         print('Started: applying ML model')
-        trainData, testData, monthTrainData, monthTestData, split = self._prepare_data_for_use()
-    
+        trainData, testData, monthTrainData, monthTestData, split = self.data_processor.splitSpeiData(self.training_data, self.configs_dict['parcelDataTrain'])
+        
         (trainDataForPrediction  , trainDataTrueValues         ,
           testDataForPrediction  , testDataTrueValues          ,
          trainMonthsForPrediction, trainMonthForPredictedValues,
-          testMonthsForPrediction, testMonthForPredictedValues  ) = self._create_io_datasets(trainData, testData, monthTrainData, monthTestData)
-    
-            #faz previsões e calcula os erros
-        trainPredictValues = self.model.predict(trainDataForPrediction)
-        testPredictValues  = self.model.predict(testDataForPrediction)
-    
-        print(f'trainPredictValues: {trainPredictValues}')
-        print(f'testPredictValues : {testPredictValues} ')
-    
+          testMonthsForPrediction, testMonthForPredictedValues  ) = self.data_processor._create_io_datasets(trainData, testData, monthTrainData, monthTestData)
+       
+        self._make_predictions(trainDataForPrediction, testDataForPrediction)
+        
         #trainErrors = getError(trainDataTrueValues, trainPredictValues)
         #testErrors = getError(testDataTrueValues, testPredictValues)
         #self._print_errors(trainErrors, testErrors, regionName)

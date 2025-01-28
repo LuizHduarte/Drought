@@ -1,8 +1,9 @@
-from classes import NeuralNetwork, DataProcessor
+from classes import Dataset, DataProcessor, NeuralNetwork
 
-data_processor        = DataProcessor('config.json')
-model_rio_pardo_de_mg = NeuralNetwork('config.json', data_processor, './Data/spei12_riopardodeminas.xlsx')
-model_rio_pardo_de_mg.apply_ml_model()
+dataset_rio_pardo_de_mg = Dataset      ('./Data/', 'spei12_riopardodeminas.xlsx')
+data_processor          = DataProcessor('config.json')
+model_rio_pardo_de_mg   = NeuralNetwork('config.json', data_processor, dataset_rio_pardo_de_mg)
+model_rio_pardo_de_mg.apply_ml_model   ()
 
 #model = UseNeuralNetwork('./Data/spei12_riopardodeminas.xlsx', "Rio Pardo", training=True)
 #UseNeuralNetwork("./Data/spei12_FranciscoSá.xlsx", "Francisco Sá", model, training=False)
