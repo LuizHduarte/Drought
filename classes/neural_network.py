@@ -3,9 +3,11 @@ import json
 import matplotlib.pyplot as plt
 
 class NeuralNetwork:
-    def __init__(self, file_name, data_processor):
+    def __init__(self, file_name, data_processor, training_data):
         self.data_processor = data_processor
-        self.configs_dict   = self._set_ml_model_parameters(file_name)        
+        self.training_data  = training_data
+        
+        self.configs_dict   = self._set_ml_model_parameters(file_name)
         self.model          = self._create_ml_model()
         print(self.model.summary())
         self.train_ml_model()
@@ -40,6 +42,72 @@ class NeuralNetwork:
         
         return model
     
+    def _prepare_data_for_use(self):
+            #[0] = lista de dados do SPEI referentes à parcela de treinamento (80%)
+            #[1] = lista de dados do SPEI referentes à parcela de teste (20%)
+            #[2] = lista de datas referentes à parcela de treinamento (80%)
+            #[3] = lista de datas referentes à parcela de teste (20%)
+            #[4] = valor inteiro da posição que o dataset foi splitado
+        trainData, testData, monthTrainData, monthTestData, split = self.data_processor.splitSpeiData(self.training_data, self.configs_dict['parcelDataTrain'])        
+        
+        return trainData, testData, monthTrainData, monthTestData, split
+    
+    def _create_io_datasets(self, trainData, testData, monthTrainData, monthTestData):
+            # Dataset que contém a parcela de dados que será utilizada para...
+            #[0] = ... alimentar a predição da rede
+            #[1] = ... validar se as predições da rede estão corretas
+        trainDataForPrediction, trainDataTrueValues = self.data_processor.cria_IN_OUT(trainData, self.configs_dict['total_points']) # Treinamento
+        testDataForPrediction , testDataTrueValues  = self.data_processor.cria_IN_OUT(testData , self.configs_dict['total_points']) # Teste
+    
+            # Dataset que contém a parcela dos meses nos quais...
+            #[0] = ... os SPEIs foram utilizados para alimentar a predição da rede
+            #[1] = ... os SPEIs foram preditos
+        trainMonthsForPrediction, trainMonthForPredictedValues = self.data_processor.cria_IN_OUT(monthTrainData, self.configs_dict['total_points']) # Treinamento
+        testMonthsForPrediction , testMonthForPredictedValues  = self.data_processor.cria_IN_OUT(monthTestData , self.configs_dict['total_points']) # Teste
+
+        return trainDataForPrediction, trainDataTrueValues, testDataForPrediction, testDataTrueValues, trainMonthsForPrediction, trainMonthForPredictedValues, testMonthsForPrediction, testMonthForPredictedValues
+    
+    def train_ml_model(self):
+        print('Started: training of ML model')
+        (     trainData,      testData,
+         monthTrainData, monthTestData,
+         split) = self.data_processor.splitSpeiData(self.training_data, self.configs_dict['parcelDataTrain'])
+        
+        trainDataForPrediction, trainDataTrueValues = self.data_processor.cria_IN_OUT(trainData, self.configs_dict['total_points']) # Treinamento
+        history=self.model.fit(trainDataForPrediction, trainDataTrueValues, epochs=self.configs_dict['numberOfEpochs'], batch_size=1, verbose=0)
+        self._print_loss_chart(history)
+        print('Ended: training of ML model')
+
+    def apply_ml_model(self):
+        print('Started: applying ML model')
+        trainData, testData, monthTrainData, monthTestData, split = self._prepare_data_for_use()
+    
+        (trainDataForPrediction  , trainDataTrueValues         ,
+          testDataForPrediction  , testDataTrueValues          ,
+         trainMonthsForPrediction, trainMonthForPredictedValues,
+          testMonthsForPrediction, testMonthForPredictedValues  ) = self._create_io_datasets(trainData, testData, monthTrainData, monthTestData)
+    
+            #faz previsões e calcula os erros
+        trainPredictValues = self.model.predict(trainDataForPrediction)
+        testPredictValues  = self.model.predict(testDataForPrediction)
+    
+        print(f'trainPredictValues: {trainPredictValues}')
+        print(f'testPredictValues : {testPredictValues} ')
+    
+        #trainErrors = getError(trainDataTrueValues, trainPredictValues)
+        #testErrors = getError(testDataTrueValues, testPredictValues)
+        #self._print_errors(trainErrors, testErrors, regionName)
+        
+    
+        #showSpeiData(xlsx, testData, split, regionName)
+        
+        # if training:
+        #     showSpeiTest(xlsx, testData, split, regionName)
+            
+        # showPredictionResults(trainDataTrueValues, testDataTrueValues, trainPredictValues, testPredictValues, trainMonthForPredictedValues, testMonthForPredictedValues, xlsx)
+        # showPredictionsDistribution(trainDataTrueValues, testDataTrueValues, trainPredictValues, testPredictValues, xlsx)
+        print('Ended: applying ML model')
+    
     def _print_loss_chart(self, history):
         plt.figure()
         plt.plot(history.history['loss'],'k')
@@ -47,58 +115,10 @@ class NeuralNetwork:
         plt.legend(['loss'])
         plt.show()
     
-    def train_ml_model(self):
-        print('Started: training of ML model')
-        trainData, testData, monthTrainData, monthTestData, split = self.data_processor._splitSpeiData('./Data/spei12_riopardodeminas.xlsx', self.configs_dict['parcelDataTrain'])
-        trainDataForPrediction, trainDataTrueValues = self.data_processor._cria_IN_OUT(trainData, self.configs_dict['total_points'], self.configs_dict['dense_units']) # Treinamento
-        history=self.model.fit(trainDataForPrediction, trainDataTrueValues, epochs=self.configs_dict['numberOfEpochs'], batch_size=1, verbose=0)
-        self._print_loss_chart(history)
-        print('Ended: training of ML model')
+    def _print_errors(self, trainErrors, testErrors, regionName):
+        print("--------------Result for " + regionName +"---------------")
+        print("---------------------Train-----------------------")
+        print(trainErrors)
     
-    # def apply_ml_model(self):
-    #         #[0] = lista de dados do SPEI referentes à parcela de treinamento (80%)
-    #         #[1] = lista de dados do SPEI referentes à parcela de teste (20%)
-    #         #[2] = lista de datas referentes à parcela de treinamento (80%)
-    #         #[3] = lista de datas referentes à parcela de teste (20%)
-    #         #[4] = valor inteiro da posição que o dataset foi splitado
-    #     trainData, testData, monthTrainData, monthTestData, split = splitSpeiData(xlsx)
-    
-    #         # Dataset que contém a parcela de dados que será utilizada para...
-    #         #[0] = ... alimentar a predição da rede
-    #         #[1] = ... validar se as predições da rede estão corretas
-    #     trainDataForPrediction, trainDataTrueValues = cria_IN_OUT(trainData, totalPoints) # Treinamento
-    #     testDataForPrediction , testDataTrueValues  = cria_IN_OUT(testData , totalPoints) # Teste
-    
-    #         # Dataset que contém a parcela dos meses nos quais...
-    #         #[0] = ... os SPEIs foram utilizados para alimentar a predição da rede
-    #         #[1] = ... os SPEIs foram preditos
-    #     trainMonthsForPrediction, trainMonthForPredictedValues = cria_IN_OUT(monthTrainData, totalPoints) # Treinamento
-    #     testMonthsForPrediction , testMonthForPredictedValues  = cria_IN_OUT(monthTestData , totalPoints) # Teste
-    
-    #     if training:
-    #         model = trainNeuralNetwork(trainDataForPrediction, trainDataTrueValues)
-    
-    #         #faz previsões e calcula os erros
-    #     trainPredictValues = model.predict(trainDataForPrediction)
-    #     testPredictValues = model.predict(testDataForPrediction)
-    
-    #     trainErrors = getError(trainDataTrueValues, trainPredictValues)
-    #     testErrors = getError(testDataTrueValues, testPredictValues)
-    
-    #     print("--------------Result for " + regionName +"---------------")
-    #     print("---------------------Train-----------------------")
-    #     print(trainErrors)
-    
-    #     print("---------------------Test------------------------")
-    #     print(testErrors)
-    
-    #     showSpeiData(xlsx, testData, split, regionName)
-        
-    #     if training:
-    #         showSpeiTest(xlsx, testData, split, regionName)
-            
-    #     showPredictionResults(trainDataTrueValues, testDataTrueValues, trainPredictValues, testPredictValues, trainMonthForPredictedValues, testMonthForPredictedValues, xlsx)
-    #     showPredictionsDistribution(trainDataTrueValues, testDataTrueValues, trainPredictValues, testPredictValues, xlsx)
-    
-    #     return model
-    
+        print("---------------------Test------------------------")
+        print(testErrors)
