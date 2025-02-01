@@ -5,12 +5,12 @@ import matplotlib.pyplot as plt
 class NeuralNetwork:
     def __init__(self, file_name, data_processor, dataset):
         self.data_processor = data_processor
-        self.dataset  = dataset
+        self.dataset        = dataset
         
         self.configs_dict   = self._set_ml_model_parameters(file_name)
         self.model          = self._create_ml_model()
+        print('Input shape:', self.model.input_shape)
         print(self.model.summary())
-        self.train_ml_model()
     
     def _load_config_file(self, file_name):
         with open(file_name) as file:
@@ -18,7 +18,7 @@ class NeuralNetwork:
     
     def _set_ml_model_parameters(self, file_name):
         configs_dict                = self._load_config_file(file_name)
-        configs_dict['input_shape'] = (configs_dict['total_points']-configs_dict['hidden_units'],1)
+        configs_dict['input_shape'] = (configs_dict['total_points']-configs_dict['dense_units'],1)
         configs_dict['activation' ] = ['relu','sigmoid']
         configs_dict['loss'       ] = 'mse'
         configs_dict['metrics'    ] = ['mae',
@@ -38,19 +38,24 @@ class NeuralNetwork:
         model.add(tf.keras.layers.Dense(units=self.configs_dict['dense_units'], activation=self.configs_dict['activation'][1]))
         model.add(tf.keras.layers.Dense(units=self.configs_dict['dense_units'], activation=self.configs_dict['activation'][1]))
         model.compile(loss=self.configs_dict['loss'], metrics=self.configs_dict['metrics'], optimizer=self.configs_dict['optimizer'])
+        
         print('Ended: creation of ML model')
         
         return model
     
     def train_ml_model(self):
         print('Started: training of ML model')
+        
+        print('Started: train_test_split')
         (     trainData,      testData,
          monthTrainData, monthTestData,
          split) = self.dataset.train_test_split(self.configs_dict['parcelDataTrain'])
+        print('Ended: train_test_split')
         
-        trainDataForPrediction, trainDataTrueValues = self.data_processor.cria_IN_OUT(trainData, self.configs_dict['total_points'], self.configs_dict['dense_units']) # Treinamento
+        trainDataForPrediction, trainDataTrueValues = self.data_processor.cria_IN_OUT(trainData, self.configs_dict['total_points'], self.configs_dict['dense_units'])
+        
         history=self.model.fit(trainDataForPrediction, trainDataTrueValues, epochs=self.configs_dict['numberOfEpochs'], batch_size=1, verbose=0)
-        self._print_loss_chart(history)
+        # self._print_loss_chart(history)
         print('Ended: training of ML model')
 
     def _make_predictions(self, trainDataForPrediction, testDataForPrediction):

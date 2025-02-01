@@ -1,6 +1,5 @@
 import numpy      as np
 
-
 class DataProcessor:
     def __init__(self, file_name):
         pass
@@ -25,7 +24,7 @@ class DataProcessor:
         OUT         = data[OUT_indices]
         lin_x       = len(OUT)
         IN          = data[range(janela*lin_x)]
-        IN          = np.reshape(IN, (lin_x, janela, 1))    
+        IN          = np.reshape(IN, (lin_x, janela, 1))
         OUT_final   = IN[ : , -dense_units: , 0 ]
         IN_final    = IN[ : , :-dense_units , : ]
         
