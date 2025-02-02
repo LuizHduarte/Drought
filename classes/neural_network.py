@@ -2,6 +2,7 @@ import tensorflow as tf
 import json
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
+import sys
 
 class NeuralNetwork:
     def __init__(self, file_name, data_processor, dataset):
@@ -49,10 +50,10 @@ class NeuralNetwork:
         (spei_for_training, spei_for_testing,
          months_for_training, months_for_testing) = train_test_split(self.dataset.get_spei_normalized(), self.dataset.get_months(), train_size=self.configs_dict['parcelDataTrain'], shuffle=False)
         
-        trainDataForPrediction, trainDataTrueValues = self.data_processor.cria_IN_OUT(spei_for_training, self.configs_dict['total_points'], self.configs_dict['dense_units'])
+        trainDataForPrediction, trainDataTrueValues = self.data_processor.create_input_output(spei_for_training, self.configs_dict['total_points'], self.configs_dict['dense_units'])
         
         history=self.model.fit(trainDataForPrediction, trainDataTrueValues, epochs=self.configs_dict['numberOfEpochs'], batch_size=1, verbose=0)
-        # self._print_loss_chart(history)
+        self._print_loss_chart(history)
         print('Ended: training of ML model')
 
     def _make_predictions(self, trainDataForPrediction, spei_for_testingForPrediction):
