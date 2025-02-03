@@ -28,10 +28,10 @@ class DataProcessor:
         
         # Last 'dense_units' elements from each window → output;
         # Remaining elements in each window            → input :
-        OUT_final = windows[ : , -dense_units :              ]
-        IN_final  = windows[ : ,              : -dense_units ]
+        output_data = windows[ : , -dense_units :              ]
+        input_data  = windows[ : ,              : -dense_units ]
         
         # +new dimension at the end of the array:
-        IN_final = IN_final[..., np.newaxis]
+        input_data = input_data[..., np.newaxis]
         
-        return IN_final, OUT_final
+        return input_data, output_data

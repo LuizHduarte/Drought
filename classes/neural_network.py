@@ -47,31 +47,30 @@ class NeuralNetwork:
     
     def train_ml_model(self):
         print('Started: training of ML model')
-        (spei_for_training, spei_for_testing,
-         months_for_training, months_for_testing) = train_test_split(self.dataset.get_spei_normalized(), self.dataset.get_months(), train_size=self.configs_dict['parcelDataTrain'], shuffle=False)
+        (spei_for_training, _, _, _) = train_test_split(self.dataset.get_spei_normalized(), self.dataset.get_months(), train_size=self.configs_dict['parcelDataTrain'], shuffle=False)
         
-        trainDataForPrediction, trainDataTrueValues = self.data_processor.create_input_output(spei_for_training, self.configs_dict['total_points'], self.configs_dict['dense_units'])
+        train_input_sequences, train_output_targets = self.data_processor.create_input_output(spei_for_training, self.configs_dict['total_points'], self.configs_dict['dense_units'])
         
-        history=self.model.fit(trainDataForPrediction, trainDataTrueValues, epochs=self.configs_dict['numberOfEpochs'], batch_size=1, verbose=0)
+        history=self.model.fit(train_input_sequences, train_output_targets, epochs=self.configs_dict['numberOfEpochs'], batch_size=1, verbose=0)
         self._print_loss_chart(history)
         print('Ended: training of ML model')
 
-    def _make_predictions(self, trainDataForPrediction, spei_for_testingForPrediction):
-        predicted_spei_normalized_train = self.model.predict(trainDataForPrediction)
+    def _make_predictions(self, train_input_sequences, spei_for_testingForPrediction):
+        predicted_spei_normalized_train = self.model.predict(train_input_sequences)
         predicted_spei_normalized_test  = self.model.predict(spei_for_testingForPrediction)
         
         return predicted_spei_normalized_train, predicted_spei_normalized_test
         
     def apply_ml_model(self):
         print('Started: applying ML model')
-        spei_for_training, spei_for_testing, months_for_training, months_for_testing, split = self.dataset.train_test_split(self.configs_dict['parcelDataTrain'])
+        spei_for_training, spei_for_testing, months_for_training, months_for_testing = train_test_split(self.dataset.get_spei_normalized(), self.dataset.get_months(), train_size=self.configs_dict['parcelDataTrain'], shuffle=False)
         
-        (trainDataForPrediction  , trainDataTrueValues         ,
+        (train_input_sequences  , train_output_targets         ,
           spei_for_testingForPrediction  , spei_for_testingTrueValues          ,
          trainMonthsForPrediction, trainMonthForPredictedValues,
           testMonthsForPrediction, testMonthForPredictedValues  ) = self.data_processor._create_io_datasets(spei_for_training, spei_for_testing, months_for_training, months_for_testing, self.configs_dict['total_points'], self.configs_dict['dense_units'])
        
-        #trainErrors = getError(trainDataTrueValues, trainPredictValues)
+        #trainErrors = getError(train_output_targets, trainPredictValues)
         #testErrors = getError(spei_for_testingTrueValues, testPredictValues)
         #self._print_errors(trainErrors, testErrors, regionName)
         
@@ -81,11 +80,11 @@ class NeuralNetwork:
         # if training:
         #     showSpeiTest(xlsx, spei_for_testing, split_position, regionName)
             
-        # showPredictionResults(trainDataTrueValues, spei_for_testingTrueValues, trainPredictValues, testPredictValues, trainMonthForPredictedValues, testMonthForPredictedValues, xlsx)
-        # showPredictionsDistribution(trainDataTrueValues, spei_for_testingTrueValues, trainPredictValues, testPredictValues, xlsx)
+        # showPredictionResults(train_output_targets, spei_for_testingTrueValues, trainPredictValues, testPredictValues, trainMonthForPredictedValues, testMonthForPredictedValues, xlsx)
+        # showPredictionsDistribution(train_output_targets, spei_for_testingTrueValues, trainPredictValues, testPredictValues, xlsx)
         print('Ended: applying ML model')
         
-        return self._make_predictions(trainDataForPrediction, spei_for_testingForPrediction)
+        return self._make_predictions(train_input_sequences, spei_for_testingForPrediction)
     
     def _print_loss_chart(self, history):
         plt.figure()
