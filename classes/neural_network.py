@@ -5,9 +5,10 @@ from sklearn.model_selection import train_test_split
 import sys
 
 class NeuralNetwork:
-    def __init__(self, file_name, data_processor, dataset):
+    def __init__(self, file_name, data_processor, dataset, plotter):
         self.data_processor = data_processor
         self.dataset        = dataset
+        self.plotter        = plotter
         
         self.configs_dict   = self._set_ml_model_parameters(file_name)
         self.model          = self._create_ml_model()
@@ -52,7 +53,7 @@ class NeuralNetwork:
         train_input_sequences, train_output_targets = self.data_processor.create_input_output(spei_for_training, self.configs_dict['total_points'], self.configs_dict['dense_units'])
         
         history=self.model.fit(train_input_sequences, train_output_targets, epochs=self.configs_dict['numberOfEpochs'], batch_size=1, verbose=0)
-        self._print_loss_chart(history)
+        self.plotter.print_loss_chart(history)
         print('Ended: training of ML model')
 
     def _make_predictions(self, train_input_sequences, spei_for_testingForPrediction):
@@ -63,38 +64,34 @@ class NeuralNetwork:
         
     def apply_ml_model(self):
         print('Started: applying ML model')
-        spei_for_training, spei_for_testing, months_for_training, months_for_testing = train_test_split(self.dataset.get_spei_normalized(), self.dataset.get_months(), train_size=self.configs_dict['parcelDataTrain'], shuffle=False)
+        (  spei_for_training,   spei_for_testing,
+         months_for_training, months_for_testing) = train_test_split(self.dataset.get_spei_normalized(), self.dataset.get_months(), train_size=self.configs_dict['parcelDataTrain'], shuffle=False)
         
         (train_input_sequences  , train_output_targets         ,
           spei_for_testingForPrediction  , spei_for_testingTrueValues          ,
          trainMonthsForPrediction, trainMonthForPredictedValues,
           testMonthsForPrediction, testMonthForPredictedValues  ) = self.data_processor._create_io_datasets(spei_for_training, spei_for_testing, months_for_training, months_for_testing, self.configs_dict['total_points'], self.configs_dict['dense_units'])
        
+        predicted_spei_normalized_train, predicted_spei_normalized_test = self._make_predictions(train_input_sequences, spei_for_testingForPrediction)
+        
         #trainErrors = getError(train_output_targets, trainPredictValues)
         #testErrors = getError(spei_for_testingTrueValues, testPredictValues)
         #self._print_errors(trainErrors, testErrors, regionName)
         
-        #split_position = len(spei_for_training)
-        #showSpeiData(xlsx, spei_for_testing, split_position, regionName)
+        split_position = len(spei_for_training)
+        self.plotter.showSpeiData(spei_for_testing, split_position)
         
         # if training:
         #     showSpeiTest(xlsx, spei_for_testing, split_position, regionName)
             
-        # showPredictionResults(train_output_targets, spei_for_testingTrueValues, trainPredictValues, testPredictValues, trainMonthForPredictedValues, testMonthForPredictedValues, xlsx)
-        # showPredictionsDistribution(train_output_targets, spei_for_testingTrueValues, trainPredictValues, testPredictValues, xlsx)
+        self.plotter.showPredictionResults(train_output_targets, spei_for_testingTrueValues, predicted_spei_normalized_train, predicted_spei_normalized_test, trainMonthForPredictedValues, testMonthForPredictedValues)
+        self.plotter.showPredictionsDistribution(train_output_targets, spei_for_testingTrueValues, predicted_spei_normalized_train, predicted_spei_normalized_test)
         print('Ended: applying ML model')
         
         return self._make_predictions(train_input_sequences, spei_for_testingForPrediction)
     
-    def _print_loss_chart(self, history):
-        plt.figure()
-        plt.plot(history.history['loss'],'k')
-        plt.ylabel('Mean Squared Error (MSE)')
-        plt.legend(['loss'])
-        plt.show()
-    
-    def _print_errors(self, trainErrors, testErrors, regionName):
-        print("--------------Result for " + regionName +"---------------")
+    def _print_errors(self, trainErrors, testErrors):
+        print("--------------Result for " +"---------------")
         print("---------------------Train-----------------------")
         print(trainErrors)
     
