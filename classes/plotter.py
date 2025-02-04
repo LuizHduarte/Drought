@@ -33,7 +33,7 @@ class Plotter:
         plt.plot(self.monthValues[split:],test_data,'k',label='Parcela de Teste')
         plt.legend()
     
-    def showSpeiTest(self, test_data, split, regionName):
+    def showSpeiTest(self, test_data, split):
         y1positive=np.array(self.speiValues)>=0
         y1negative = np.array(self.speiValues)<=0
     
@@ -44,7 +44,7 @@ class Plotter:
         color='red',alpha=0.5,interpolate=False, label='índices SPEI negativos')
         plt.xlabel('Ano')
         plt.ylabel('SPEI')
-        plt.title('SPEI Data - ' + regionName)
+        plt.title('SPEI Data - ' + '')
         plt.legend()
         plt.show()
     

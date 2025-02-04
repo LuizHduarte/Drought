@@ -45,16 +45,6 @@ class NeuralNetwork:
         print('Ended: creation of ML model')
         
         return model
-    
-    def train_ml_model(self):
-        print('Started: training of ML model')
-        (spei_for_training, _, _, _) = train_test_split(self.dataset.get_spei_normalized(), self.dataset.get_months(), train_size=self.configs_dict['parcelDataTrain'], shuffle=False)
-        
-        train_input_sequences, train_output_targets = self.data_processor.create_input_output(spei_for_training, self.configs_dict['total_points'], self.configs_dict['dense_units'])
-        
-        history=self.model.fit(train_input_sequences, train_output_targets, epochs=self.configs_dict['numberOfEpochs'], batch_size=1, verbose=0)
-        self.plotter.print_loss_chart(history)
-        print('Ended: training of ML model')
 
     def _make_predictions(self, train_input_sequences, spei_for_testingForPrediction):
         predicted_spei_normalized_train = self.model.predict(train_input_sequences)
@@ -62,7 +52,7 @@ class NeuralNetwork:
         
         return predicted_spei_normalized_train, predicted_spei_normalized_test
         
-    def apply_ml_model(self):
+    def use_neural_network(self, is_training):
         print('Started: applying ML model')
         (  spei_for_training,   spei_for_testing,
          months_for_training, months_for_testing) = train_test_split(self.dataset.get_spei_normalized(), self.dataset.get_months(), train_size=self.configs_dict['parcelDataTrain'], shuffle=False)
@@ -72,23 +62,52 @@ class NeuralNetwork:
          trainMonthsForPrediction, trainMonthForPredictedValues,
           testMonthsForPrediction, testMonthForPredictedValues  ) = self.data_processor._create_io_datasets(spei_for_training, spei_for_testing, months_for_training, months_for_testing, self.configs_dict['total_points'], self.configs_dict['dense_units'])
        
+        if is_training:
+            self.train_ml_model()
+        
         predicted_spei_normalized_train, predicted_spei_normalized_test = self._make_predictions(train_input_sequences, spei_for_testingForPrediction)
         
-        #trainErrors = getError(train_output_targets, trainPredictValues)
-        #testErrors = getError(spei_for_testingTrueValues, testPredictValues)
-        #self._print_errors(trainErrors, testErrors, regionName)
+        trainErrors = self._getError(train_output_targets, predicted_spei_normalized_train)
+        testErrors  = self._getError(spei_for_testingTrueValues, predicted_spei_normalized_test)
+        self._print_errors(trainErrors, testErrors)
         
         split_position = len(spei_for_training)
         self.plotter.showSpeiData(spei_for_testing, split_position)
         
-        # if training:
-        #     showSpeiTest(xlsx, spei_for_testing, split_position, regionName)
+        if is_training:
+            self.plotter.showSpeiTest(spei_for_testing, split_position)
             
         self.plotter.showPredictionResults(train_output_targets, spei_for_testingTrueValues, predicted_spei_normalized_train, predicted_spei_normalized_test, trainMonthForPredictedValues, testMonthForPredictedValues)
         self.plotter.showPredictionsDistribution(train_output_targets, spei_for_testingTrueValues, predicted_spei_normalized_train, predicted_spei_normalized_test)
         print('Ended: applying ML model')
         
         return self._make_predictions(train_input_sequences, spei_for_testingForPrediction)
+    
+    def train_ml_model(self):
+        print('Started: training of ML model (may take a while)')
+        (spei_for_training, _, _, _) = train_test_split(self.dataset.get_spei_normalized(), self.dataset.get_months(), train_size=self.configs_dict['parcelDataTrain'], shuffle=False)
+        
+        train_input_sequences, train_output_targets = self.data_processor.create_input_output(spei_for_training, self.configs_dict['total_points'], self.configs_dict['dense_units'])
+        
+        history=self.model.fit(train_input_sequences, train_output_targets, epochs=self.configs_dict['numberOfEpochs'], batch_size=1, verbose=0)
+        self.plotter.print_loss_chart(history)
+        print('Ended: training of ML model')
+    
+    def _getError(self, actual, prediction):
+        metrics = {
+            'RMSE' : tf.keras.metrics.RootMeanSquaredError(),
+            'MSE'  : tf.keras.metrics.MeanSquaredError    (),
+            'MAE'  : tf.keras.metrics.MeanAbsoluteError   (),
+            'R^2'  : tf.keras.metrics.R2Score             (class_aggregation='variance_weighted_average')
+        }
+    
+        metrics_values = dict.fromkeys(metrics.keys())
+        
+        for metric_name, metric_function in metrics.items():
+            metric_function.update_state(actual, prediction)
+            metrics_values[metric_name] = metric_function.result().numpy()
+        
+        return (metrics_values)
     
     def _print_errors(self, trainErrors, testErrors):
         print("--------------Result for " +"---------------")
