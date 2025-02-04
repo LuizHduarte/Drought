@@ -1,10 +1,9 @@
 import tensorflow as tf
 import json
-import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
-import sys
 
 class NeuralNetwork:
+    
     def __init__(self, file_name, data_processor, dataset, plotter):
         self.data_processor = data_processor
         self.dataset        = dataset
@@ -52,10 +51,13 @@ class NeuralNetwork:
         
         return predicted_spei_normalized_train, predicted_spei_normalized_test
         
-    def use_neural_network(self, is_training):
+    def use_neural_network(self, is_training, dataset=None):
+        if dataset == None:
+            dataset = self.dataset
+        
         print('Started: applying ML model')
         (  spei_for_training,   spei_for_testing,
-         months_for_training, months_for_testing) = train_test_split(self.dataset.get_spei_normalized(), self.dataset.get_months(), train_size=self.configs_dict['parcelDataTrain'], shuffle=False)
+         months_for_training, months_for_testing) = train_test_split(dataset.get_spei_normalized(), dataset.get_months(), train_size=self.configs_dict['parcelDataTrain'], shuffle=False)
         
         (train_input_sequences  , train_output_targets         ,
           spei_for_testingForPrediction  , spei_for_testingTrueValues          ,
@@ -63,7 +65,7 @@ class NeuralNetwork:
           testMonthsForPrediction, testMonthForPredictedValues  ) = self.data_processor._create_io_datasets(spei_for_training, spei_for_testing, months_for_training, months_for_testing, self.configs_dict['total_points'], self.configs_dict['dense_units'])
        
         if is_training:
-            self.train_ml_model()
+            self._train_ml_model()
         
         predicted_spei_normalized_train, predicted_spei_normalized_test = self._make_predictions(train_input_sequences, spei_for_testingForPrediction)
         
@@ -83,7 +85,7 @@ class NeuralNetwork:
         
         return self._make_predictions(train_input_sequences, spei_for_testingForPrediction)
     
-    def train_ml_model(self):
+    def _train_ml_model(self):
         print('Started: training of ML model (may take a while)')
         (spei_for_training, _, _, _) = train_test_split(self.dataset.get_spei_normalized(), self.dataset.get_months(), train_size=self.configs_dict['parcelDataTrain'], shuffle=False)
         
