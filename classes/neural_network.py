@@ -9,27 +9,28 @@ class NeuralNetwork:
         self.dataset        = dataset
         self.plotter        = plotter
         
-        self.configs_dict   = self._set_ml_model_parameters(file_name)
+        self.configs_dict   = self._set_configs(file_name)
         self.model          = self._create_ml_model()
         print('Input shape:', self.model.input_shape)
         print(self.model.summary())
     
-    def _load_config_file(self, file_name):
+    def _set_configs(self, file_name):
         with open(file_name) as file:
-            return json.load(file)
-    
-    def _set_ml_model_parameters(self, file_name):
-        configs_dict                = self._load_config_file(file_name)
-        configs_dict['input_shape'] = (configs_dict['total_points']-configs_dict['dense_units'],1)
-        configs_dict['activation' ] = ['relu','sigmoid']
-        configs_dict['loss'       ] = 'mse'
-        configs_dict['metrics'    ] = ['mae',
-                                       tf.keras.metrics.RootMeanSquaredError(name='rmse'),
-                                       'mse',
-                                       tf.keras.metrics.R2Score(name="r2")]
-        configs_dict['optimizer'  ] = 'adam'
+            configs_dict = json.load(file)
         
-        return configs_dict
+        configs_dict.update(
+            {'input_shape' : (configs_dict['total_points'] - configs_dict['dense_units'], 1),
+             'activation'  : ['relu', 'sigmoid'],
+             'loss'        : 'mse',
+             'metrics'     : ['mae',
+                             tf.keras.metrics.RootMeanSquaredError(name='rmse'),
+                             'mse',
+                             tf.keras.metrics.R2Score(name="r2")],
+             'optimizer'   : 'adam'
+            }
+       )
+        
+        return configs_dict        
     
     def _create_ml_model(self):
         print('Started: creation of ML model')
