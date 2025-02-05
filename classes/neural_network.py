@@ -3,7 +3,7 @@ import json
 from sklearn.model_selection import train_test_split
 
 class NeuralNetwork:
-    
+
     def __init__(self, file_name, data_processor, dataset, plotter):
         self.data_processor = data_processor
         self.dataset        = dataset
@@ -31,15 +31,14 @@ class NeuralNetwork:
        )
         
         return configs_dict        
-    
+
     def _create_ml_model(self):
         print('Started: creation of ML model')
         model = tf.keras.Sequential()
         model.add(tf.keras.Input       (shape=self.configs_dict['input_shape']))
         model.add(tf.keras.layers.LSTM (     self.configs_dict['hidden_units'], activation=self.configs_dict['activation'][0]))
-        model.add(tf.keras.layers.Dense(units=self.configs_dict['dense_units'], activation=self.configs_dict['activation'][1]))
-        model.add(tf.keras.layers.Dense(units=self.configs_dict['dense_units'], activation=self.configs_dict['activation'][1]))
-        model.add(tf.keras.layers.Dense(units=self.configs_dict['dense_units'], activation=self.configs_dict['activation'][1]))
+        for dense_unit in range(3):
+            model.add(tf.keras.layers.Dense(units=self.configs_dict['dense_units'], activation=self.configs_dict['activation'][1]))
         model.compile(loss=self.configs_dict['loss'], metrics=self.configs_dict['metrics'], optimizer=self.configs_dict['optimizer'])
         
         print('Ended: creation of ML model')
@@ -60,10 +59,10 @@ class NeuralNetwork:
         (  spei_for_training,   spei_for_testing,
          months_for_training, months_for_testing) = train_test_split(dataset.get_spei_normalized(), dataset.get_months(), train_size=self.configs_dict['parcelDataTrain'], shuffle=False)
         
-        (train_input_sequences  , train_output_targets         ,
-          spei_for_testingForPrediction  , spei_for_testingTrueValues          ,
-         trainMonthsForPrediction, trainMonthForPredictedValues,
-          testMonthsForPrediction, testMonthForPredictedValues  ) = self.data_processor._create_io_datasets(spei_for_training, spei_for_testing, months_for_training, months_for_testing, self.configs_dict['total_points'], self.configs_dict['dense_units'])
+        (train_input_sequences         , train_output_targets         ,
+         spei_for_testingForPrediction , spei_for_testingTrueValues   ,
+         trainMonthsForPrediction      , trainMonthForPredictedValues ,
+          testMonthsForPrediction      , testMonthForPredictedValues  ) = self.data_processor._create_io_datasets(spei_for_training, spei_for_testing, months_for_training, months_for_testing, self.configs_dict['total_points'], self.configs_dict['dense_units'])
        
         if is_training:
             self._train_ml_model()
@@ -72,6 +71,19 @@ class NeuralNetwork:
         
         trainErrors = self._getError(train_output_targets, predicted_spei_normalized_train)
         testErrors  = self._getError(spei_for_testingTrueValues, predicted_spei_normalized_test)
+        
+        self._evaluate_and_plot(is_training,
+                                trainErrors                     , testErrors                     ,
+                                spei_for_training               , spei_for_testing               ,
+                                train_output_targets            , spei_for_testingTrueValues     ,
+                                predicted_spei_normalized_train , predicted_spei_normalized_test ,
+                                trainMonthForPredictedValues    , testMonthForPredictedValues    )
+        
+        print('Ended: applying ML model')
+        
+        return self._make_predictions(train_input_sequences, spei_for_testingForPrediction)
+    
+    def _evaluate_and_plot(self, is_training, trainErrors, testErrors, spei_for_training, spei_for_testing, train_output_targets,  spei_for_testingTrueValues, predicted_spei_normalized_train, predicted_spei_normalized_test, trainMonthForPredictedValues, testMonthForPredictedValues):
         self._print_errors(trainErrors, testErrors)
         
         split_position = len(spei_for_training)
@@ -82,9 +94,6 @@ class NeuralNetwork:
             
         self.plotter.showPredictionResults(train_output_targets, spei_for_testingTrueValues, predicted_spei_normalized_train, predicted_spei_normalized_test, trainMonthForPredictedValues, testMonthForPredictedValues)
         self.plotter.showPredictionsDistribution(train_output_targets, spei_for_testingTrueValues, predicted_spei_normalized_train, predicted_spei_normalized_test)
-        print('Ended: applying ML model')
-        
-        return self._make_predictions(train_input_sequences, spei_for_testingForPrediction)
     
     def _train_ml_model(self):
         print('Started: training of ML model (may take a while)')
