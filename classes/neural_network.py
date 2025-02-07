@@ -4,6 +4,8 @@ from sklearn.model_selection import train_test_split
 
 class NeuralNetwork:
 
+    DATA_TYPES_LIST = ['Train', 'Test']
+
     def __init__(self, file_name, data_processor, dataset, plotter):
         self.data_processor = data_processor
         self.dataset        = dataset
@@ -57,14 +59,16 @@ class NeuralNetwork:
             dataset = self.dataset
         
         print('Started: applying ML model')
-        spei_dict   = {'Train': None, 'Test': None}
-        months_dict = {'Train': None, 'Test': None}
+        spei_dict   = dict.fromkeys(NeuralNetwork.DATA_TYPES_LIST)
+        months_dict = dict.fromkeys(NeuralNetwork.DATA_TYPES_LIST)
         
         (  spei_dict['Train'],   spei_dict['Test'],
          months_dict['Train'], months_dict['Test']) = train_test_split(dataset.get_spei_normalized(), dataset.get_months(), train_size=self.configs_dict['parcelDataTrain'], shuffle=False)
         
+        # trainDataForPrediction, trainDataTrueValues, testDataForPrediction, testDataTrueValues = self.data_processor._create_io_datasets(spei_dict, self.configs_dict['totalPoints'])
+        
         (train_input_sequences         , train_output_targets         ,
-         speiTestForPrediction , speiTestTrueValues   ,
+         speiTestForPrediction         , speiTestTrueValues           ,
          trainMonthsForPrediction      , trainMonthForPredictedValues ,
           testMonthsForPrediction      , testMonthForPredictedValues  ) = self.data_processor._create_io_datasets(spei_dict, months_dict, self.configs_dict)
        
@@ -101,9 +105,14 @@ class NeuralNetwork:
     
     def _train_ml_model(self):
         print('Started: training of ML model (may take a while)')
-        (spei_train, _, _, _) = train_test_split(self.dataset.get_spei_normalized(), self.dataset.get_months(), train_size=self.configs_dict['parcelDataTrain'], shuffle=False)
+        print('Started: applying ML model')
+        spei_dict   = dict.fromkeys(NeuralNetwork.DATA_TYPES_LIST)
+        months_dict = dict.fromkeys(NeuralNetwork.DATA_TYPES_LIST)
         
-        train_input_sequences, train_output_targets = self.data_processor.create_input_output(spei_train, self.configs_dict['total_points'], self.configs_dict['dense_units'])
+        (  spei_dict['Train'],   spei_dict['Test'],
+         months_dict['Train'], months_dict['Test']) = train_test_split(self.dataset.get_spei_normalized(), self.dataset.get_months(), train_size=self.configs_dict['parcelDataTrain'], shuffle=False)
+        
+        train_input_sequences, train_output_targets, _, _ = self.data_processor.create_input_output(spei_dict, self.configs_dict)
         
         history=self.model.fit(train_input_sequences, train_output_targets, epochs=self.configs_dict['numberOfEpochs'], batch_size=1, verbose=0)
         self.plotter.print_loss_chart(history)

@@ -1,37 +1,41 @@
 import numpy as np
 
 class DataProcessor:
-    def __init__(self, file_name):
-        pass
+    
+    DATA_TYPES_LIST = ['Train', 'Test']
 
     def _create_io_datasets(self, spei_dict, months_dict, configs_dict):
-            # Dataset que contém a parcela de dados que será utilizada para...
-            #[0] = ... alimentar a predição da rede
-            #[1] = ... validar se as predições da rede estão corretas
-        trainDataForPrediction, trainDataTrueValues = self.create_input_output(spei_dict['Train'], configs_dict['total_points'], configs_dict['dense_units']) # Treinamento
-        testDataForPrediction , testDataTrueValues  = self.create_input_output(spei_dict['Test'], configs_dict['total_points'], configs_dict['dense_units']) # Teste
-    
-            # Dataset que contém a parcela dos meses nos quais...
-            #[0] = ... os SPEIs foram utilizados para alimentar a predição da rede
-            #[1] = ... os SPEIs foram preditos
-        trainMonthsForPrediction, trainMonthForPredictedValues = self.create_input_output(months_dict['Train'], configs_dict['total_points'], configs_dict['dense_units']) # Treinamento
-        testMonthsForPrediction , testMonthForPredictedValues  = self.create_input_output(months_dict['Test'] , configs_dict['total_points'], configs_dict['dense_units']) # Teste
+        
+        # IN : "(train, test)DataForPrediction": alimentar a predição da rede
+        # OUT: "(train, test)DataTrueValues"   : validar se as predições da rede estão corretas
+        trainDataForPrediction, trainDataTrueValues, testDataForPrediction, testDataTrueValues =  self.create_input_output(spei_dict, configs_dict) # trainData_dict (to-do)
+        
+        # IN : "(train, test)MonthsForPrediction"    : os SPEIs foram utilizados para alimentar a predição da rede
+        # OUT: "(train, test)MonthForPredictedValues": os SPEIs foram preditos
+        trainMonthsForPrediction, trainMonthForPredictedValues, testMonthsForPrediction, testMonthForPredictedValues =  self.create_input_output(months_dict, configs_dict) # trainMonths_dict (to-do)
 
         return trainDataForPrediction, trainDataTrueValues, testDataForPrediction, testDataTrueValues, trainMonthsForPrediction, trainMonthForPredictedValues, testMonthsForPrediction, testMonthForPredictedValues
 
-    def create_input_output(self, data, window_gap, dense_units):
-        # Data → sliding windows (with overlaps):
-        windows = np.lib.stride_tricks.sliding_window_view(data, window_gap)
+    def create_input_output(self, data_dict, configs_dict):
+        window_gap  = configs_dict['total_points']
+        dense_units = configs_dict['dense_units']
         
-        # -overlaps by selecting only every 'window_gap'-th window:
-        windows = windows[::window_gap]
+        input_dict  = dict.fromkeys(DataProcessor.DATA_TYPES_LIST)
+        output_dict = dict.fromkeys(DataProcessor.DATA_TYPES_LIST)
         
-        # Last 'dense_units' elements from each window → output;
-        # Remaining elements in each window            → input :
-        output_data = windows[ : , -dense_units :              ]
-        input_data  = windows[ : ,              : -dense_units ]
+        for train_or_test in DataProcessor.DATA_TYPES_LIST:
+            # Data → sliding windows (with overlaps):
+            windows = np.lib.stride_tricks.sliding_window_view(data_dict[train_or_test], window_gap)
+            
+            # -overlaps by selecting only every 'window_gap'-th window:
+            windows = windows[::window_gap]
+            
+            # Last 'dense_units' elements from each window → output;
+            # Remaining elements in each window            → input :
+            output_dict[train_or_test] = windows[ : , -dense_units :              ]
+            input_dict [train_or_test] = windows[ : ,              : -dense_units ]
+            
+            # +new dimension at the end of the array:
+            input_dict[train_or_test] = input_dict[train_or_test][..., np.newaxis]
         
-        # +new dimension at the end of the array:
-        input_data = input_data[..., np.newaxis]
-        
-        return input_data, output_data
+        return input_dict['Train'], output_dict['Train'], input_dict['Test'], output_dict['Test']
