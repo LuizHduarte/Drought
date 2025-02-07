@@ -4,18 +4,18 @@ class DataProcessor:
     def __init__(self, file_name):
         pass
 
-    def _create_io_datasets(self, trainData, testData, monthTrainData, monthTestData, total_points, dense_units):
+    def _create_io_datasets(self, spei_dict, months_dict, configs_dict):
             # Dataset que contém a parcela de dados que será utilizada para...
             #[0] = ... alimentar a predição da rede
             #[1] = ... validar se as predições da rede estão corretas
-        trainDataForPrediction, trainDataTrueValues = self.create_input_output(trainData, total_points, dense_units) # Treinamento
-        testDataForPrediction , testDataTrueValues  = self.create_input_output(testData , total_points, dense_units) # Teste
+        trainDataForPrediction, trainDataTrueValues = self.create_input_output(spei_dict['Train'], configs_dict['total_points'], configs_dict['dense_units']) # Treinamento
+        testDataForPrediction , testDataTrueValues  = self.create_input_output(spei_dict['Test'], configs_dict['total_points'], configs_dict['dense_units']) # Teste
     
             # Dataset que contém a parcela dos meses nos quais...
             #[0] = ... os SPEIs foram utilizados para alimentar a predição da rede
             #[1] = ... os SPEIs foram preditos
-        trainMonthsForPrediction, trainMonthForPredictedValues = self.create_input_output(monthTrainData, total_points, dense_units) # Treinamento
-        testMonthsForPrediction , testMonthForPredictedValues  = self.create_input_output(monthTestData , total_points, dense_units) # Teste
+        trainMonthsForPrediction, trainMonthForPredictedValues = self.create_input_output(months_dict['Train'], configs_dict['total_points'], configs_dict['dense_units']) # Treinamento
+        testMonthsForPrediction , testMonthForPredictedValues  = self.create_input_output(months_dict['Test'] , configs_dict['total_points'], configs_dict['dense_units']) # Teste
 
         return trainDataForPrediction, trainDataTrueValues, testDataForPrediction, testDataTrueValues, trainMonthsForPrediction, trainMonthForPredictedValues, testMonthsForPrediction, testMonthForPredictedValues
 

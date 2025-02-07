@@ -11,6 +11,7 @@ class NeuralNetwork:
         
         self.configs_dict   = self._set_configs(file_name)
         self.model          = self._create_ml_model()
+        
         print('Input shape:', self.model.input_shape)
         print(self.model.summary())
     
@@ -45,9 +46,9 @@ class NeuralNetwork:
         
         return model
 
-    def _make_predictions(self, train_input_sequences, spei_for_testingForPrediction):
+    def _make_predictions(self, train_input_sequences, speiTestForPrediction):
         predicted_spei_normalized_train = self.model.predict(train_input_sequences)
-        predicted_spei_normalized_test  = self.model.predict(spei_for_testingForPrediction)
+        predicted_spei_normalized_test  = self.model.predict(speiTestForPrediction)
         
         return predicted_spei_normalized_train, predicted_spei_normalized_test
         
@@ -56,50 +57,53 @@ class NeuralNetwork:
             dataset = self.dataset
         
         print('Started: applying ML model')
-        (  spei_for_training,   spei_for_testing,
-         months_for_training, months_for_testing) = train_test_split(dataset.get_spei_normalized(), dataset.get_months(), train_size=self.configs_dict['parcelDataTrain'], shuffle=False)
+        spei_dict   = {'Train': None, 'Test': None}
+        months_dict = {'Train': None, 'Test': None}
+        
+        (  spei_dict['Train'],   spei_dict['Test'],
+         months_dict['Train'], months_dict['Test']) = train_test_split(dataset.get_spei_normalized(), dataset.get_months(), train_size=self.configs_dict['parcelDataTrain'], shuffle=False)
         
         (train_input_sequences         , train_output_targets         ,
-         spei_for_testingForPrediction , spei_for_testingTrueValues   ,
+         speiTestForPrediction , speiTestTrueValues   ,
          trainMonthsForPrediction      , trainMonthForPredictedValues ,
-          testMonthsForPrediction      , testMonthForPredictedValues  ) = self.data_processor._create_io_datasets(spei_for_training, spei_for_testing, months_for_training, months_for_testing, self.configs_dict['total_points'], self.configs_dict['dense_units'])
+          testMonthsForPrediction      , testMonthForPredictedValues  ) = self.data_processor._create_io_datasets(spei_dict, months_dict, self.configs_dict)
        
         if is_training:
             self._train_ml_model()
         
-        predicted_spei_normalized_train, predicted_spei_normalized_test = self._make_predictions(train_input_sequences, spei_for_testingForPrediction)
+        predicted_spei_normalized_train, predicted_spei_normalized_test = self._make_predictions(train_input_sequences, speiTestForPrediction)
         
         trainErrors = self._getError(train_output_targets, predicted_spei_normalized_train)
-        testErrors  = self._getError(spei_for_testingTrueValues, predicted_spei_normalized_test)
+        testErrors  = self._getError(speiTestTrueValues, predicted_spei_normalized_test)
         
         self._evaluate_and_plot(is_training,
                                 trainErrors                     , testErrors                     ,
-                                spei_for_training               , spei_for_testing               ,
-                                train_output_targets            , spei_for_testingTrueValues     ,
+                                spei_dict                                                        ,
+                                train_output_targets            , speiTestTrueValues             ,
                                 predicted_spei_normalized_train , predicted_spei_normalized_test ,
                                 trainMonthForPredictedValues    , testMonthForPredictedValues    )
         
         print('Ended: applying ML model')
         
-        return self._make_predictions(train_input_sequences, spei_for_testingForPrediction)
+        return self._make_predictions(train_input_sequences, speiTestForPrediction)
     
-    def _evaluate_and_plot(self, is_training, trainErrors, testErrors, spei_for_training, spei_for_testing, train_output_targets,  spei_for_testingTrueValues, predicted_spei_normalized_train, predicted_spei_normalized_test, trainMonthForPredictedValues, testMonthForPredictedValues):
+    def _evaluate_and_plot(self, is_training, trainErrors, testErrors, spei_dict, train_output_targets,  speiTestTrueValues, predicted_spei_normalized_train, predicted_spei_normalized_test, trainMonthForPredictedValues, testMonthForPredictedValues):
         self._print_errors(trainErrors, testErrors)
         
-        split_position = len(spei_for_training)
-        self.plotter.showSpeiData(spei_for_testing, split_position)
+        split_position = len(spei_dict['Train'])
+        self.plotter.showSpeiData(spei_dict['Test'], split_position)
         
         if is_training:
-            self.plotter.showSpeiTest(spei_for_testing, split_position)
+            self.plotter.showSpeiTest(spei_dict['Test'], split_position)
             
-        self.plotter.showPredictionResults(train_output_targets, spei_for_testingTrueValues, predicted_spei_normalized_train, predicted_spei_normalized_test, trainMonthForPredictedValues, testMonthForPredictedValues)
-        self.plotter.showPredictionsDistribution(train_output_targets, spei_for_testingTrueValues, predicted_spei_normalized_train, predicted_spei_normalized_test)
+        self.plotter.showPredictionResults(train_output_targets, speiTestTrueValues, predicted_spei_normalized_train, predicted_spei_normalized_test, trainMonthForPredictedValues, testMonthForPredictedValues)
+        self.plotter.showPredictionsDistribution(train_output_targets, speiTestTrueValues, predicted_spei_normalized_train, predicted_spei_normalized_test)
     
     def _train_ml_model(self):
         print('Started: training of ML model (may take a while)')
-        (spei_for_training, _, _, _) = train_test_split(self.dataset.get_spei_normalized(), self.dataset.get_months(), train_size=self.configs_dict['parcelDataTrain'], shuffle=False)
+        (spei_train, _, _, _) = train_test_split(self.dataset.get_spei_normalized(), self.dataset.get_months(), train_size=self.configs_dict['parcelDataTrain'], shuffle=False)
         
-        train_input_sequences, train_output_targets = self.data_processor.create_input_output(spei_for_training, self.configs_dict['total_points'], self.configs_dict['dense_units'])
+        train_input_sequences, train_output_targets = self.data_processor.create_input_output(spei_train, self.configs_dict['total_points'], self.configs_dict['dense_units'])
         
         history=self.model.fit(train_input_sequences, train_output_targets, epochs=self.configs_dict['numberOfEpochs'], batch_size=1, verbose=0)
         self.plotter.print_loss_chart(history)

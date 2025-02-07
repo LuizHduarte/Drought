@@ -50,8 +50,8 @@ class Plotter:
     
     def showPredictionResults(self, trainDataTrueValues, testDataTrueValues, trainPredictValues, testPredictValues, trainMonthForPredictedValues, testMonthForPredictedValues):
     
-        trueValues = np.append(trainDataTrueValues, testDataTrueValues)
-        predictions = np.append(trainPredictValues, testPredictValues)
+        trueValues  = np.append(trainDataTrueValues, testDataTrueValues)
+        predictions = np.append(trainPredictValues , testPredictValues )
     
         reshapedMonth = np.append(trainMonthForPredictedValues, testMonthForPredictedValues)
     
