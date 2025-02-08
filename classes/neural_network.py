@@ -73,7 +73,7 @@ class NeuralNetwork:
           testMonthsForPrediction      , testMonthForPredictedValues  ) = self.data_processor._create_io_datasets(spei_dict, months_dict, self.configs_dict)
        
         if is_training:
-            self._train_ml_model()
+            self._train_ml_model(spei_dict, months_dict)
         
         predicted_spei_normalized_train, predicted_spei_normalized_test = self._make_predictions(train_input_sequences, speiTestForPrediction)
         
@@ -103,14 +103,9 @@ class NeuralNetwork:
         self.plotter.showPredictionResults(train_output_targets, speiTestTrueValues, predicted_spei_normalized_train, predicted_spei_normalized_test, trainMonthForPredictedValues, testMonthForPredictedValues)
         self.plotter.showPredictionsDistribution(train_output_targets, speiTestTrueValues, predicted_spei_normalized_train, predicted_spei_normalized_test)
     
-    def _train_ml_model(self):
+    def _train_ml_model(self, spei_dict, months_dict):
         print('Started: training of ML model (may take a while)')
         print('Started: applying ML model')
-        spei_dict   = dict.fromkeys(NeuralNetwork.DATA_TYPES_LIST)
-        months_dict = dict.fromkeys(NeuralNetwork.DATA_TYPES_LIST)
-        
-        (  spei_dict['Train'],   spei_dict['Test'],
-         months_dict['Train'], months_dict['Test']) = train_test_split(self.dataset.get_spei_normalized(), self.dataset.get_months(), train_size=self.configs_dict['parcelDataTrain'], shuffle=False)
         
         train_input_sequences, train_output_targets, _, _ = self.data_processor.create_input_output(spei_dict, self.configs_dict)
         
