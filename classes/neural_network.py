@@ -1,13 +1,11 @@
 import tensorflow as tf
 import json
-from sklearn.model_selection import train_test_split
 
 class NeuralNetwork:
 
     DATA_TYPES_LIST = ['Train', 'Test']
 
-    def __init__(self, file_name, data_processor, dataset, plotter):
-        self.data_processor = data_processor
+    def __init__(self, file_name, dataset, plotter):
         self.dataset        = dataset
         self.plotter        = plotter
         
@@ -59,37 +57,39 @@ class NeuralNetwork:
             dataset = self.dataset
         
         print('Started: applying ML model')
-        spei_dict   = dict.fromkeys(NeuralNetwork.DATA_TYPES_LIST)
-        months_dict = dict.fromkeys(NeuralNetwork.DATA_TYPES_LIST)
+        # SPEI_dict  .keys() = ['Train', 'Test']
+        # months_dict.keys() = ['Train', 'Test']
+        spei_dict, months_dict = self.dataset.train_test_split(self.configs_dict['parcelDataTrain'])
+        # IN : "(train, test)DataForPrediction": alimentar a predição da rede
+        # OUT: "(train, test)DataTrueValues"   : validar se as predições da rede estão corretas
+        (speiTrainForPrediction, speiTrainTrueValues,
+          speiTestForPrediction,  speiTestTrueValues) =  dataset.create_input_output(spei_dict, self.configs_dict)
+        # trainData_dict (to-do)
         
-        (  spei_dict['Train'],   spei_dict['Test'],
-         months_dict['Train'], months_dict['Test']) = train_test_split(dataset.get_spei_normalized(), dataset.get_months(), train_size=self.configs_dict['parcelDataTrain'], shuffle=False)
-        
-        # trainDataForPrediction, trainDataTrueValues, testDataForPrediction, testDataTrueValues = self.data_processor._create_io_datasets(spei_dict, self.configs_dict['totalPoints'])
-        
-        (train_input_sequences         , train_output_targets         ,
-         speiTestForPrediction         , speiTestTrueValues           ,
-         trainMonthsForPrediction      , trainMonthForPredictedValues ,
-          testMonthsForPrediction      , testMonthForPredictedValues  ) = self.data_processor._create_io_datasets(spei_dict, months_dict, self.configs_dict)
+        # IN : "(train, test)MonthsForPrediction"    : os SPEIs foram utilizados para alimentar a predição da rede
+        # OUT: "(train, test)MonthForPredictedValues": os SPEIs foram preditos
+        (trainMonthsForPrediction, trainMonthForPredictedValues,
+          testMonthsForPrediction, testMonthForPredictedValues ) =  dataset.create_input_output(months_dict, self.configs_dict)
+        # trainMonths_dict (to-do)
        
         if is_training:
             self._train_ml_model(spei_dict, months_dict)
         
-        predicted_spei_normalized_train, predicted_spei_normalized_test = self._make_predictions(train_input_sequences, speiTestForPrediction)
+        predicted_spei_normalized_train, predicted_spei_normalized_test = self._make_predictions(speiTrainForPrediction, speiTestForPrediction)
         
-        trainErrors = self._getError(train_output_targets, predicted_spei_normalized_train)
+        trainErrors = self._getError(speiTrainTrueValues, predicted_spei_normalized_train)
         testErrors  = self._getError(speiTestTrueValues, predicted_spei_normalized_test)
         
         self._evaluate_and_plot(is_training,
                                 trainErrors                     , testErrors                     ,
                                 spei_dict                                                        ,
-                                train_output_targets            , speiTestTrueValues             ,
+                                speiTrainTrueValues            , speiTestTrueValues             ,
                                 predicted_spei_normalized_train , predicted_spei_normalized_test ,
                                 trainMonthForPredictedValues    , testMonthForPredictedValues    )
         
         print('Ended: applying ML model')
         
-        return self._make_predictions(train_input_sequences, speiTestForPrediction)
+        return self._make_predictions(speiTrainForPrediction, speiTestForPrediction)
     
     def _evaluate_and_plot(self, is_training, trainErrors, testErrors, spei_dict, train_output_targets,  speiTestTrueValues, predicted_spei_normalized_train, predicted_spei_normalized_test, trainMonthForPredictedValues, testMonthForPredictedValues):
         self._print_errors(trainErrors, testErrors)
@@ -107,7 +107,7 @@ class NeuralNetwork:
         print('Started: training of ML model (may take a while)')
         print('Started: applying ML model')
         
-        train_input_sequences, train_output_targets, _, _ = self.data_processor.create_input_output(spei_dict, self.configs_dict)
+        train_input_sequences, train_output_targets, _, _ = self.dataset.create_input_output(spei_dict, self.configs_dict)
         
         history=self.model.fit(train_input_sequences, train_output_targets, epochs=self.configs_dict['numberOfEpochs'], batch_size=1, verbose=0)
         self.plotter.print_loss_chart(history)
