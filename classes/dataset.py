@@ -52,4 +52,4 @@ class Dataset:
             # +new dimension at the end of the array:
             input_dict[train_or_test] = input_dict[train_or_test][..., np.newaxis]
         
-        return input_dict['Train'], output_dict['Train'], input_dict['Test'], output_dict['Test']
+        return input_dict, output_dict
