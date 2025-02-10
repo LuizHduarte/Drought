@@ -14,6 +14,7 @@ class Plotter:
         plt.figure()
         plt.plot(history.history['loss'],'k')
         plt.ylabel('Mean Squared Error (MSE)')
+        plt.title(f'{self.dataset.city_name}')
         plt.legend(['loss'])
         plt.show()
 
@@ -23,13 +24,14 @@ class Plotter:
         plt.plot(self.monthValues,self.speiValues,label='SPEI Original')
         plt.xlabel('Ano')
         plt.ylabel('SPEI')
-        plt.title('SPEI Data - ' + '')
+        plt.title(f'SPEI Data - {self.dataset.city_name}')
         plt.legend()
     
         plt.subplot(2,1,2)
         plt.plot(self.monthValues,self.speiNormalizedValues,label='Parcela de Treinamento')
         plt.xlabel('Ano')
         plt.ylabel('SPEI (Normalizado)')
+        plt.title(f'{self.dataset.city_name}')
         plt.plot(self.monthValues[split:],test_data,'k',label='Parcela de Teste')
         plt.legend()
     
@@ -43,8 +45,8 @@ class Plotter:
         plt.fill_between(self.monthValues, self.speiValues,y2=0,where=y1negative,
         color='red',alpha=0.5,interpolate=False, label='índices SPEI negativos')
         plt.xlabel('Ano')
-        plt.ylabel('SPEI')
-        plt.title('SPEI Data - ' + '')
+        plt.ylabel('SPEI')        
+        plt.title(f'SPEI Data - {self.dataset.city_name}')
         plt.legend()
         plt.show()
     
@@ -68,7 +70,7 @@ class Plotter:
         plt.legend(['Verdadeiros', 'Previstos'])
         plt.xlabel('Data')
         plt.ylabel('SPEI')
-        plt.title('Valores verdadeiros e previstos para o final das séries.')
+        plt.title(f'Valores verdadeiros e previstos para o final das séries. - {self.dataset.city_name}')
         plt.show()
     
     def showPredictionsDistribution(self, trainDataTrueValues, testDataTrueValues, trainPredictValues, testPredictValues):
@@ -85,5 +87,6 @@ class Plotter:
         plt.scatter(x=trueValues_denormalized, y=predictions_denormalized, color=['white'], marker='^', edgecolors='black')
         plt.xlabel('SPEI Verdadeiros')
         plt.ylabel('SPEI Previstos')
+        plt.title(f'{self.dataset.city_name}')
         plt.axline((0, 0), slope=1)
         plt.show()

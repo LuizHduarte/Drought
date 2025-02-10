@@ -46,59 +46,58 @@ class NeuralNetwork:
         
         return model
        
-    def use_neural_network(self, is_training, dataset=None):
-        if dataset == None:
-            dataset = self.dataset
+    def use_neural_network(self, is_training, dataset=None, plotter=None):
+        if dataset == None: dataset = self.dataset
+        if plotter == None: plotter = self.plotter
         
         print('Started: applying ML model')
         #(SPEI/months)_dict.keys() = ['Train', 'Test']
-        #         IN            ,           OUT          :
-        spei_dict               , months_dict            = self.dataset.train_test_split(self.configs_dict['parcelDataTrain'])
-        dataForPrediction_dict  , dataTrueValues_dict    =  dataset.create_input_output(spei_dict, self.configs_dict)
+        spei_dict               , months_dict             = dataset.train_test_split(self.configs_dict['parcelDataTrain'])
+        
+        #         IN            ,           OUT           :
+        dataForPrediction_dict  , dataTrueValues_dict     =  dataset.create_input_output(spei_dict, self.configs_dict)
         monthsForPrediction_dict, monthsForPredicted_dict =  dataset.create_input_output(months_dict, self.configs_dict)
        
         if is_training:
-            self._train_ml_model(spei_dict, months_dict)
+            print('Started: training of ML model (may take a while)')
+            history=self.model.fit(dataForPrediction_dict['Train'], dataTrueValues_dict['Train'], epochs=self.configs_dict['numberOfEpochs'], batch_size=1, verbose=0)
+            plotter.print_loss_chart(history)
+            print('Ended: training of ML model')
         
         predictValues_dict = {
             'Train': self.model.predict(dataForPrediction_dict['Train'], verbose = 0),
-            'Test' : self.model.predict(dataForPrediction_dict['Test'] , verbose = 0)
+            'Test' : self.model.predict(dataForPrediction_dict['Test' ], verbose = 0)
                              }
         
-        trainErrors = self._getError(dataTrueValues_dict['Train'], predictValues_dict['Train'])
-        testErrors  = self._getError(dataTrueValues_dict['Test' ], predictValues_dict['Test'])
+        # RMSE, MSE, MAE, R²:
+        errors_dict = {
+            'Train': self._getError(dataTrueValues_dict['Train'], predictValues_dict['Train']),
+            'Test' : self._getError(dataTrueValues_dict['Test' ], predictValues_dict['Test' ])
+                      }
         
-        self._evaluate_and_plot(is_training,
-                                trainErrors                     , testErrors                     ,
+        self._evaluate_and_plot(is_training                     ,
+                                dataset                         , plotter                        ,
+                                errors_dict            ['Train'], errors_dict            ['Test'],
                                 spei_dict                                                        ,
-                                dataTrueValues_dict['Train']    , dataTrueValues_dict['Test' ]   ,
-                                predictValues_dict['Train'] , predictValues_dict['Test'] ,
+                                dataTrueValues_dict    ['Train'], dataTrueValues_dict    ['Test'],
+                                predictValues_dict     ['Train'], predictValues_dict     ['Test'],
                                 monthsForPredicted_dict['Train'], monthsForPredicted_dict['Test'])
         
         print('Ended: applying ML model')
         
         return predictValues_dict
     
-    def _evaluate_and_plot(self, is_training, trainErrors, testErrors, spei_dict, train_output_targets,  speiTestTrueValues, predicted_spei_normalized_train, predicted_spei_normalized_test, trainMonthForPredictedValues, testMonthForPredictedValues):
-        self._print_errors(trainErrors, testErrors)
+    def _evaluate_and_plot(self, is_training, dataset, plotter, trainErrors, testErrors, spei_dict, train_output_targets,  speiTestTrueValues, predicted_spei_normalized_train, predicted_spei_normalized_test, trainMonthForPredictedValues, testMonthForPredictedValues):
+        self._print_errors(dataset, trainErrors, testErrors)
         
         split_position = len(spei_dict['Train'])
-        self.plotter.showSpeiData(spei_dict['Test'], split_position)
+        plotter.showSpeiData(spei_dict['Test'], split_position)
         
         if is_training:
-            self.plotter.showSpeiTest(spei_dict['Test'], split_position)
+            plotter.showSpeiTest(spei_dict['Test'], split_position)
             
-        self.plotter.showPredictionResults(train_output_targets, speiTestTrueValues, predicted_spei_normalized_train, predicted_spei_normalized_test, trainMonthForPredictedValues, testMonthForPredictedValues)
-        self.plotter.showPredictionsDistribution(train_output_targets, speiTestTrueValues, predicted_spei_normalized_train, predicted_spei_normalized_test)
-    
-    def _train_ml_model(self, spei_dict, months_dict):
-        print('Started: training of ML model (may take a while)')
-        
-        train_input_sequences, train_output_targets = self.dataset.create_input_output(spei_dict, self.configs_dict)
-        
-        history=self.model.fit(train_input_sequences['Train'], train_output_targets['Train'], epochs=self.configs_dict['numberOfEpochs'], batch_size=1, verbose=0)
-        self.plotter.print_loss_chart(history)
-        print('Ended: training of ML model')
+        plotter.showPredictionResults(train_output_targets, speiTestTrueValues, predicted_spei_normalized_train, predicted_spei_normalized_test, trainMonthForPredictedValues, testMonthForPredictedValues)
+        plotter.showPredictionsDistribution(train_output_targets, speiTestTrueValues, predicted_spei_normalized_train, predicted_spei_normalized_test)
     
     def _getError(self, actual, prediction):
         metrics = {
@@ -116,8 +115,8 @@ class NeuralNetwork:
         
         return (metrics_values)
     
-    def _print_errors(self, trainErrors, testErrors):
-        print("--------------Result for " +"---------------")
+    def _print_errors(self, dataset, trainErrors, testErrors):
+        print(f"--------------Result for {dataset.city_name}---------------")
         print("---------------------Train-----------------------")
         print(trainErrors)
     
