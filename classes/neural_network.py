@@ -77,27 +77,36 @@ class NeuralNetwork:
         
         self._evaluate_and_plot(is_training                     ,
                                 dataset                         , plotter                        ,
-                                errors_dict            ['Train'], errors_dict            ['Test'],
-                                spei_dict                                                        ,
-                                dataTrueValues_dict    ['Train'], dataTrueValues_dict    ['Test'],
-                                predictValues_dict     ['Train'], predictValues_dict     ['Test'],
-                                monthsForPredicted_dict['Train'], monthsForPredicted_dict['Test'])
+                                errors_dict                     , spei_dict                      ,
+                                dataTrueValues_dict             , predictValues_dict             ,
+                                monthsForPredicted_dict                                          )
         
         print('Ended: applying ML model')
         
         return predictValues_dict
     
-    def _evaluate_and_plot(self, is_training, dataset, plotter, trainErrors, testErrors, spei_dict, train_output_targets,  speiTestTrueValues, predicted_spei_normalized_train, predicted_spei_normalized_test, trainMonthForPredictedValues, testMonthForPredictedValues):
-        self._print_errors(dataset, trainErrors, testErrors)
+    def _evaluate_and_plot(self, is_training,
+                           dataset                        , plotter                       ,
+                           errors_dict                    , spei_dict                     ,
+                           dataTrueValues_dict            , predictValues_dict            ,
+                           monthsForPredicted_dict                                        ):
+        
+        self._print_errors(dataset, errors_dict)
         
         split_position = len(spei_dict['Train'])
-        plotter.showSpeiData(spei_dict['Test'], split_position)
+        plotter.showSpeiData(spei_dict['Test' ], split_position)
         
         if is_training:
             plotter.showSpeiTest(spei_dict['Test'], split_position)
             
-        plotter.showPredictionResults(train_output_targets, speiTestTrueValues, predicted_spei_normalized_train, predicted_spei_normalized_test, trainMonthForPredictedValues, testMonthForPredictedValues)
-        plotter.showPredictionsDistribution(train_output_targets, speiTestTrueValues, predicted_spei_normalized_train, predicted_spei_normalized_test)
+        plotter.showPredictionResults(
+            dataTrueValues_dict    ['Train'], dataTrueValues_dict    ['Test'],
+            predictValues_dict     ['Train'], predictValues_dict     ['Test'],
+            monthsForPredicted_dict['Train'], monthsForPredicted_dict['Test'])
+        
+        plotter.showPredictionsDistribution(
+            dataTrueValues_dict['Train'], dataTrueValues_dict['Test'],
+            predictValues_dict ['Train'], predictValues_dict ['Test'])
     
     def _getError(self, actual, prediction):
         metrics = {
@@ -115,10 +124,10 @@ class NeuralNetwork:
         
         return (metrics_values)
     
-    def _print_errors(self, dataset, trainErrors, testErrors):
+    def _print_errors(self, dataset, errors_dict):
         print(f"--------------Result for {dataset.city_name}---------------")
         print("---------------------Train-----------------------")
-        print(trainErrors)
+        print(errors_dict['Train'])
     
         print("---------------------Test------------------------")
-        print(testErrors)
+        print(errors_dict['Test' ])
