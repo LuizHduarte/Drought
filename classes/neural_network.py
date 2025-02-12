@@ -75,21 +75,21 @@ class NeuralNetwork:
             'Test' : self._getError(dataTrueValues_dict['Test' ], predictValues_dict['Test' ])
                       }
         
-        self._evaluate_and_plot(is_training                     ,
-                                dataset                         , plotter                        ,
-                                errors_dict                     , spei_dict                      ,
-                                dataTrueValues_dict             , predictValues_dict             ,
-                                monthsForPredicted_dict                                          )
+        self._evaluate_and_plot(is_training            ,
+                                dataset                , plotter           ,
+                                errors_dict            , spei_dict         ,
+                                dataTrueValues_dict    , predictValues_dict,
+                                monthsForPredicted_dict                    )
         
         print('Ended: applying ML model')
         
         return predictValues_dict
     
     def _evaluate_and_plot(self, is_training,
-                           dataset                        , plotter                       ,
-                           errors_dict                    , spei_dict                     ,
-                           dataTrueValues_dict            , predictValues_dict            ,
-                           monthsForPredicted_dict                                        ):
+                           dataset                , plotter           ,
+                           errors_dict            , spei_dict         ,
+                           dataTrueValues_dict    , predictValues_dict,
+                           monthsForPredicted_dict                    ):
         
         self._print_errors(dataset, errors_dict)
         
@@ -99,14 +99,9 @@ class NeuralNetwork:
         if is_training:
             plotter.showSpeiTest(spei_dict['Test'], split_position)
             
-        plotter.showPredictionResults(
-            dataTrueValues_dict    ['Train'], dataTrueValues_dict    ['Test'],
-            predictValues_dict     ['Train'], predictValues_dict     ['Test'],
-            monthsForPredicted_dict['Train'], monthsForPredicted_dict['Test'])
-        
-        plotter.showPredictionsDistribution(
-            dataTrueValues_dict['Train'], dataTrueValues_dict['Test'],
-            predictValues_dict ['Train'], predictValues_dict ['Test'])
+        plotter.showPredictionResults(dataTrueValues_dict, predictValues_dict, monthsForPredicted_dict)
+       
+        plotter.showPredictionsDistribution(dataTrueValues_dict, predictValues_dict)
     
     def _getError(self, actual, prediction):
         metrics = {

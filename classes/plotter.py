@@ -49,13 +49,12 @@ class Plotter:
         plt.title(f'SPEI Data - {self.dataset.city_name}')
         plt.legend()
         plt.show()
+        
+    def showPredictionResults(self, dataTrueValues_dict, predictValues_dict, monthsForPredicted_dict):
+        trueValues  = np.append(dataTrueValues_dict['Train'], dataTrueValues_dict['Test'])
+        predictions = np.append( predictValues_dict['Train'],  predictValues_dict['Test'])
     
-    def showPredictionResults(self, trainDataTrueValues, testDataTrueValues, trainPredictValues, testPredictValues, trainMonthForPredictedValues, testMonthForPredictedValues):
-    
-        trueValues  = np.append(trainDataTrueValues, testDataTrueValues)
-        predictions = np.append(trainPredictValues , testPredictValues )
-    
-        reshapedMonth = np.append(trainMonthForPredictedValues, testMonthForPredictedValues)
+        reshapedMonth = np.append(monthsForPredicted_dict['Train'], monthsForPredicted_dict['Test'])
     
         speiMaxValue = np.max(self.speiValues)
         speiMinValue = np.min(self.speiValues)
@@ -66,16 +65,16 @@ class Plotter:
         plt.figure()
         plt.plot(reshapedMonth,trueValues_denormalized)
         plt.plot(reshapedMonth,predictions_denormalized)
-        plt.axvline(trainMonthForPredictedValues[-1][-1], color='r')
+        plt.axvline(monthsForPredicted_dict['Train'][-1][-1], color='r')
         plt.legend(['Verdadeiros', 'Previstos'])
         plt.xlabel('Data')
         plt.ylabel('SPEI')
         plt.title(f'Valores verdadeiros e previstos para o final das séries. - {self.dataset.city_name}')
         plt.show()
     
-    def showPredictionsDistribution(self, trainDataTrueValues, testDataTrueValues, trainPredictValues, testPredictValues):
-        trueValues = np.append(trainDataTrueValues, testDataTrueValues)
-        predictions = np.append(trainPredictValues, testPredictValues)
+    def showPredictionsDistribution(self, dataTrueValues_dict, predictValues_dict):
+        trueValues  = np.append(dataTrueValues_dict['Train'], dataTrueValues_dict['Test'])
+        predictions = np.append( predictValues_dict['Train'],  predictValues_dict['Test'])
     
         speiMaxValue = np.max(self.speiValues)
         speiMinValue = np.min(self.speiValues)
