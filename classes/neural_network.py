@@ -5,9 +5,10 @@ class NeuralNetwork:
 
     DATA_TYPES_LIST = ['Train', 'Test']
 
-    def __init__(self, file_name, dataset, plotter):
+    def __init__(self, file_name, dataset, plotter, evaluator):
         self.dataset        = dataset
         self.plotter        = plotter
+        self.evaluator      = evaluator
         
         self.configs_dict   = self._set_configs(file_name)
         self.model          = self._create_ml_model()
@@ -69,60 +70,11 @@ class NeuralNetwork:
             'Test' : self.model.predict(dataForPrediction_dict['Test' ], verbose = 0)
                              }
         
-        # RMSE, MSE, MAE, R²:
-        errors_dict = {
-            'Train': self._getError(dataTrueValues_dict['Train'], predictValues_dict['Train']),
-            'Test' : self._getError(dataTrueValues_dict['Test' ], predictValues_dict['Test' ])
-                      }
+
         
-        self._evaluate_and_plot(is_training            ,
-                                dataset                , plotter           ,
-                                errors_dict            , spei_dict         ,
+        self.evaluator.evaluate_and_plot(is_training   , dataset           ,
+                                plotter                , spei_dict         ,
                                 dataTrueValues_dict    , predictValues_dict,
                                 monthsForPredicted_dict                    )
         
         print('Ended: applying ML model')
-        
-        return predictValues_dict
-    
-    def _evaluate_and_plot(self, is_training,
-                           dataset                , plotter           ,
-                           errors_dict            , spei_dict         ,
-                           dataTrueValues_dict    , predictValues_dict,
-                           monthsForPredicted_dict                    ):
-        
-        self._print_errors(dataset, errors_dict)
-        
-        split_position = len(spei_dict['Train'])
-        plotter.showSpeiData(spei_dict['Test' ], split_position)
-        
-        if is_training:
-            plotter.showSpeiTest(spei_dict['Test'], split_position)
-            
-        plotter.showPredictionResults(dataTrueValues_dict, predictValues_dict, monthsForPredicted_dict)
-       
-        plotter.showPredictionsDistribution(dataTrueValues_dict, predictValues_dict)
-    
-    def _getError(self, actual, prediction):
-        metrics = {
-            'RMSE' : tf.keras.metrics.RootMeanSquaredError(),
-            'MSE'  : tf.keras.metrics.MeanSquaredError    (),
-            'MAE'  : tf.keras.metrics.MeanAbsoluteError   (),
-            'R^2'  : tf.keras.metrics.R2Score             (class_aggregation='variance_weighted_average')
-        }
-    
-        metrics_values = dict.fromkeys(metrics.keys())
-        
-        for metric_name, metric_function in metrics.items():
-            metric_function.update_state(actual, prediction)
-            metrics_values[metric_name] = metric_function.result().numpy()
-        
-        return (metrics_values)
-    
-    def _print_errors(self, dataset, errors_dict):
-        print(f"--------------Result for {dataset.city_name}---------------")
-        print("---------------------Train-----------------------")
-        print(errors_dict['Train'])
-    
-        print("---------------------Test------------------------")
-        print(errors_dict['Test' ])
