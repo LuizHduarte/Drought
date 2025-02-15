@@ -37,8 +37,8 @@ class NeuralNetwork:
     def _create_ml_model(self):
         print('Started: creation of ML model')
         model = tf.keras.Sequential()
-        model.add(tf.keras.Input       (shape=self.configs_dict['input_shape']))
-        model.add(tf.keras.layers.LSTM (     self.configs_dict['hidden_units'], activation=self.configs_dict['activation'][0]))
+        model.add(tf.keras.Input       (shape=self.configs_dict['input_shape' ]))
+        model.add(tf.keras.layers.LSTM (      self.configs_dict['hidden_units'], activation=self.configs_dict['activation'][0]))
         for dense_unit in range(3):
             model.add(tf.keras.layers.Dense(units=self.configs_dict['dense_units'], activation=self.configs_dict['activation'][1]))
         model.compile(loss=self.configs_dict['loss'], metrics=self.configs_dict['metrics'], optimizer=self.configs_dict['optimizer'])
@@ -47,7 +47,7 @@ class NeuralNetwork:
         
         return model
        
-    def use_neural_network(self, is_training, dataset=None, plotter=None):
+    def use_neural_network(self, is_training, city_for_training, city_for_predicting=None, dataset=None, plotter=None):
         if dataset == None: dataset = self.dataset
         if plotter == None: plotter = self.plotter
         
@@ -70,11 +70,10 @@ class NeuralNetwork:
             'Test' : self.model.predict(dataForPrediction_dict['Test' ], verbose = 0)
                              }
         
-
-        
-        self.evaluator.evaluate_and_plot(is_training   , dataset           ,
-                                plotter                , spei_dict         ,
-                                dataTrueValues_dict    , predictValues_dict,
-                                monthsForPredicted_dict                    )
+        self.evaluator.evaluate_and_plot(is_training   , dataset            ,
+                                plotter                , spei_dict          ,
+                                dataTrueValues_dict    , predictValues_dict ,
+                                monthsForPredicted_dict                     ,
+                                city_for_training      , city_for_predicting)
         
         print('Ended: applying ML model')

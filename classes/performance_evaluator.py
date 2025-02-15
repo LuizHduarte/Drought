@@ -2,13 +2,15 @@ import tensorflow as tf
 import numpy      as np
 
 class PerformanceEvaluator():
-    def evaluate_and_plot(self, is_training       , dataset           ,
-                           plotter                , spei_dict         ,
-                           dataTrueValues_dict    , predictValues_dict,
-                           monthsForPredicted_dict                    ):
+
+    def evaluate_and_plot(self, is_training       , dataset            ,
+                           plotter                , spei_dict          ,
+                           dataTrueValues_dict    , predictValues_dict ,
+                           monthsForPredicted_dict                     ,
+                           city_for_training      , city_for_predicting):
         
         
-        self._print_errors(dataset, dataTrueValues_dict, predictValues_dict)
+        self._print_errors(dataTrueValues_dict, predictValues_dict, city_for_training, city_for_predicting, is_training)
         
         split_position = len(spei_dict['Train'])
         plotter.showSpeiData(spei_dict['Test' ], split_position)
@@ -35,21 +37,28 @@ class PerformanceEvaluator():
             metrics_values[metric_name] = metric_function.result().numpy()
         
         return metrics_values
+
+    def _print_errors(self, dataTrueValues_dict, predictValues_dict, city_for_training, city_for_predicting, is_training):
     
-    def _print_errors(self, dataset, dataTrueValues_dict, predictValues_dict):
-        
+        match is_training:
+            case True :
+                print(f'\t\t--------------Result for {city_for_training} (training)---------------')
+            case False:
+                print(f'\t\t--------------Result for {city_for_training} applied to {city_for_predicting}---------------')
+            case _    :
+                print('Error in method _print_errors of class PerformanceEvaluator: the is_training state cannot be recognized.')
+                return False
+    
         # RMSE, MSE, MAE, R²:
         errors_dict = {
             'Train': self.getError(dataTrueValues_dict['Train'], predictValues_dict['Train']),
             'Test' : self.getError(dataTrueValues_dict['Test' ], predictValues_dict['Test' ])
                       }
-        
-        print(f"--------------Result for {dataset.city_name}---------------")
-        print("---------------------Train-----------------------")
-        print(errors_dict['Train'])
     
-        print("---------------------Test------------------------")
-        print(errors_dict['Test' ])
+        print(f"\t\t\tTRAIN: {errors_dict['Train']}")
+        print(f"\t\t\tTEST : {errors_dict['Test'] }")
+        
+        return True
         
     def getTaylorMetrics(spei_dict, dataTrueValues_dict, predictValues_dict):    
      # Standard Deviation:
