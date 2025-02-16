@@ -46,7 +46,13 @@ class NeuralNetwork:
         print('Ended: creation of ML model')
         
         return model
-       
+    
+    def _train_ml_model(self, dataForPrediction_dict, dataTrueValues_dict):
+        print('Started: training of ML model (may take a while)')
+        history=self.model.fit(dataForPrediction_dict['Train'], dataTrueValues_dict['Train'], epochs=self.configs_dict['numberOfEpochs'], batch_size=1, verbose=0)
+        self.plotter.print_loss_chart(history)
+        print('Ended: training of ML model')
+    
     def use_neural_network(self, is_training, city_for_training, city_for_predicting=None, dataset=None, plotter=None):
         if dataset == None: dataset = self.dataset
         if plotter == None: plotter = self.plotter
@@ -60,10 +66,7 @@ class NeuralNetwork:
         monthsForPrediction_dict, monthsForPredicted_dict =  dataset.create_input_output(months_dict, self.configs_dict)
        
         if is_training:
-            print('Started: training of ML model (may take a while)')
-            history=self.model.fit(dataForPrediction_dict['Train'], dataTrueValues_dict['Train'], epochs=self.configs_dict['numberOfEpochs'], batch_size=1, verbose=0)
-            plotter.print_loss_chart(history)
-            print('Ended: training of ML model')
+            self._train_ml_model(dataForPrediction_dict, dataTrueValues_dict)
         
         predictValues_dict = {
             'Train': self.model.predict(dataForPrediction_dict['Train'], verbose = 0),
