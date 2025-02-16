@@ -39,7 +39,7 @@ class NeuralNetwork:
         model = tf.keras.Sequential()
         model.add(tf.keras.Input       (shape=self.configs_dict['input_shape' ]))
         model.add(tf.keras.layers.LSTM (      self.configs_dict['hidden_units'], activation=self.configs_dict['activation'][0]))
-        for dense_unit in range(3):
+        for _ in range(3):
             model.add(tf.keras.layers.Dense(units=self.configs_dict['dense_units'], activation=self.configs_dict['activation'][1]))
         model.compile(loss=self.configs_dict['loss'], metrics=self.configs_dict['metrics'], optimizer=self.configs_dict['optimizer'])
         
@@ -57,17 +57,14 @@ class NeuralNetwork:
         if dataset == None: dataset = self.dataset
         if plotter == None: plotter = self.plotter
         
-        print('Started: applying ML model')
-        #(SPEI/months)_dict.keys() = ['Train', 'Test']
-        spei_dict               , months_dict             = dataset.train_test_split(self.configs_dict['parcelDataTrain'])
-        
-        #         IN            ,           OUT           :
-        dataForPrediction_dict  , dataTrueValues_dict     =  dataset.create_input_output(spei_dict, self.configs_dict)
-        monthsForPrediction_dict, monthsForPredicted_dict =  dataset.create_input_output(months_dict, self.configs_dict)
+        (               spei_dict,             months_dict,
+           dataForPrediction_dict,     dataTrueValues_dict,
+         monthsForPrediction_dict, monthsForPredicted_dict) = dataset.format_data_for_model(self.configs_dict)
        
         if is_training:
             self._train_ml_model(dataForPrediction_dict, dataTrueValues_dict)
-        
+            
+        print('Started: applying ML model')        
         predictValues_dict = {
             'Train': self.model.predict(dataForPrediction_dict['Train'], verbose = 0),
             'Test' : self.model.predict(dataForPrediction_dict['Test' ], verbose = 0)

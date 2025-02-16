@@ -21,7 +21,19 @@ class Dataset:
         spei = self.get_spei()
         return ( (spei - spei.min()) / (spei.max() - spei.min()) )
     
-    def train_test_split(self, train_size):
+    def format_data_for_model(self, configs_dict):
+        #(SPEI/months)_dict.keys() = ['Train', 'Test']
+        spei_dict               , months_dict             = self.df._train_test_split(self.configs_dict['parcelDataTrain'])
+        
+        #         IN            ,           OUT           :
+        dataForPrediction_dict  , dataTrueValues_dict     =  self.df._create_input_output(  spei_dict, self.configs_dict)
+        monthsForPrediction_dict, monthsForPredicted_dict =  self.df._create_input_output(months_dict, self.configs_dict)
+        
+        return (               spei_dict,             months_dict,
+                  dataForPrediction_dict,     dataTrueValues_dict,
+                monthsForPrediction_dict, monthsForPredicted_dict)
+    
+    def _train_test_split(self, train_size):
         
         spei_dict   = dict.fromkeys(Dataset.DATA_TYPES_LIST)
         months_dict = dict.fromkeys(Dataset.DATA_TYPES_LIST)
@@ -31,7 +43,7 @@ class Dataset:
         
         return spei_dict, months_dict
     
-    def create_input_output(self, data_dict, configs_dict):
+    def _create_input_output(self, data_dict, configs_dict):
         window_gap  = configs_dict['total_points']
         dense_units = configs_dict['dense_units']
         
