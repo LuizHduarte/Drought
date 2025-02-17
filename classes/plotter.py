@@ -9,7 +9,38 @@ class Plotter:
         self.speiValues           = self.dataset.get_spei()
         self.speiNormalizedValues = self.dataset.get_spei_normalized()
         
+
+    def drawModelLineGraph(self, history, city_cluster_name, city_for_training): #, showImages):
+        
+        fig, axs = plt.subplots(nrows=2, ncols=2, sharex=True)
+        
+        axs[0, 0].plot(history.history['mae'] , 'tab:blue')
+        axs[0, 0].set_title('MAE')
+        axs[0, 0].legend(['loss'])
+        
+        axs[0, 1].plot(history.history['rmse'], 'tab:orange')
+        axs[0, 1].set_title('RMSE')
+        axs[0, 1].legend(['loss'])
+        
+        axs[1, 0].plot(history.history['mse'] , 'tab:green')
+        axs[1, 0].set_title('MSE')
+        axs[1, 0].legend(['loss'])
+        
+        axs[1, 1].plot(history.history['r2']  , 'tab:red')
+        axs[1, 1].set_title('R²')
+        axs[1, 1].legend(['explanation power'])
+        
+        for ax in axs[1]: # axs[1] = 2nd row
+            ax.set(xlabel='Epochs (training)')
+        
+        plt.suptitle(f'Model {city_for_training}')
     
+        # if(showImages):
+            # plt.show()
+        
+        # saveFig(plt, 'Line Graph.', city_cluster_name, city_for_training)
+        # plt.close()
+
     def print_loss_chart(self, history):
         plt.figure()
         plt.plot(history.history['loss'],'k')

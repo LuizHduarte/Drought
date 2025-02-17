@@ -13,8 +13,8 @@ class NeuralNetwork:
         self.configs_dict   = self._set_configs(file_name)
         self.model          = self._create_ml_model()
         
-        print('Input shape:', self.model.input_shape)
-        print(self.model.summary())
+        # print('Input shape:', self.model.input_shape)
+        # print(self.model.summary())
     
     def _set_configs(self, file_name):
         with open(file_name) as file:
@@ -43,17 +43,17 @@ class NeuralNetwork:
             model.add(tf.keras.layers.Dense(units=self.configs_dict['dense_units'], activation=self.configs_dict['activation'][1]))
         model.compile(loss=self.configs_dict['loss'], metrics=self.configs_dict['metrics'], optimizer=self.configs_dict['optimizer'])
         
-        print('Ended: creation of ML model')
+        print('Ended  : creation of ML model')
         
         return model
     
     def _train_ml_model(self, dataForPrediction_dict, dataTrueValues_dict):
         print('Started: training of ML model (may take a while)')
         history=self.model.fit(dataForPrediction_dict['Train'], dataTrueValues_dict['Train'], epochs=self.configs_dict['numberOfEpochs'], batch_size=1, verbose=0)
-        self.plotter.print_loss_chart(history)
-        print('Ended: training of ML model')
+        self.plotter.drawModelLineGraph(history, None, self.dataset.city_name)
+        print('Ended  : training of ML model')
     
-    def use_neural_network(self, is_training, city_for_training, city_for_predicting=None, dataset=None, plotter=None):
+    def use_neural_network(self, is_training, dataset=None, plotter=None):
         if dataset == None: dataset = self.dataset
         if plotter == None: plotter = self.plotter
         
@@ -74,6 +74,6 @@ class NeuralNetwork:
                                 plotter                , spei_dict          ,
                                 dataTrueValues_dict    , predictValues_dict ,
                                 monthsForPredicted_dict                     ,
-                                city_for_training      , city_for_predicting)
+                                self.dataset.city_name , dataset.city_name  )
         
         print('Ended: applying ML model')

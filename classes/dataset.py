@@ -23,11 +23,11 @@ class Dataset:
     
     def format_data_for_model(self, configs_dict):
         #(SPEI/months)_dict.keys() = ['Train', 'Test']
-        spei_dict               , months_dict             = self.df._train_test_split(self.configs_dict['parcelDataTrain'])
+        spei_dict               , months_dict             = self._train_test_split(configs_dict['parcelDataTrain'])
         
         #         IN            ,           OUT           :
-        dataForPrediction_dict  , dataTrueValues_dict     =  self.df._create_input_output(  spei_dict, self.configs_dict)
-        monthsForPrediction_dict, monthsForPredicted_dict =  self.df._create_input_output(months_dict, self.configs_dict)
+        dataForPrediction_dict  , dataTrueValues_dict     =  self._create_input_output(  spei_dict, configs_dict)
+        monthsForPrediction_dict, monthsForPredicted_dict =  self._create_input_output(months_dict, configs_dict)
         
         return (               spei_dict,             months_dict,
                   dataForPrediction_dict,     dataTrueValues_dict,
