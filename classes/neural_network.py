@@ -50,8 +50,9 @@ class NeuralNetwork:
     def _train_ml_model(self, dataForPrediction_dict, dataTrueValues_dict):
         print('Started: training of ML model (may take a while)')
         history=self.model.fit(dataForPrediction_dict['Train'], dataTrueValues_dict['Train'], epochs=self.configs_dict['numberOfEpochs'], batch_size=1, verbose=0)
-        self.plotter.drawModelLineGraph(history, None, self.dataset.city_name)
         print('Ended  : training of ML model')
+        
+        return history
     
     def use_neural_network(self, is_training, dataset=None, plotter=None):
         if dataset == None: dataset = self.dataset
@@ -62,7 +63,7 @@ class NeuralNetwork:
          monthsForPrediction_dict, monthsForPredicted_dict) = dataset.format_data_for_model(self.configs_dict)
        
         if is_training:
-            self._train_ml_model(dataForPrediction_dict, dataTrueValues_dict)
+            history = self._train_ml_model(dataForPrediction_dict, dataTrueValues_dict)
             
         print('Started: applying ML model')        
         predictValues_dict = {
@@ -74,6 +75,7 @@ class NeuralNetwork:
                                 plotter                , spei_dict          ,
                                 dataTrueValues_dict    , predictValues_dict ,
                                 monthsForPredicted_dict                     ,
-                                self.dataset.city_name , dataset.city_name  )
+                                self.dataset.city_name , dataset.city_name  ,
+                                history if is_training else None            )
         
         print('Ended: applying ML model')

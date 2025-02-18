@@ -41,14 +41,6 @@ class Plotter:
         # saveFig(plt, 'Line Graph.', city_cluster_name, city_for_training)
         # plt.close()
 
-    def print_loss_chart(self, history):
-        plt.figure()
-        plt.plot(history.history['loss'],'k')
-        plt.ylabel('Mean Squared Error (MSE)')
-        plt.title(f'{self.dataset.city_name}')
-        plt.legend(['loss'])
-        plt.show()
-
     def showSpeiData(self, test_data, split):
         plt.figure()
         plt.subplot(2,1,1)

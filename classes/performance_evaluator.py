@@ -7,7 +7,8 @@ class PerformanceEvaluator():
                            plotter                , spei_dict          ,
                            dataTrueValues_dict    , predictValues_dict ,
                            monthsForPredicted_dict                     ,
-                           city_for_training      , city_for_predicting):
+                           city_for_training      , city_for_predicting,
+                           history=None                                ):
         
         
         self._print_errors(dataTrueValues_dict, predictValues_dict, city_for_training, city_for_predicting, is_training)
@@ -16,6 +17,7 @@ class PerformanceEvaluator():
         plotter.showSpeiData(spei_dict['Test' ], split_position)
         
         if is_training:
+            plotter.drawModelLineGraph(history, None, dataset.city_name)
             plotter.showSpeiTest(spei_dict['Test'], split_position)
             
         plotter.showPredictionResults(dataTrueValues_dict, predictValues_dict, monthsForPredicted_dict)
