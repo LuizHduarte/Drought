@@ -12,6 +12,7 @@ class NeuralNetwork:
         
         self.configs_dict   = self._set_configs(file_name)
         self.model          = self._create_ml_model()
+        self.has_trained    = False
         
         # print('Input shape:', self.model.input_shape)
         # print(self.model.summary())
@@ -50,11 +51,12 @@ class NeuralNetwork:
     def _train_ml_model(self, dataForPrediction_dict, dataTrueValues_dict):
         print('Started: training of ML model (may take a while)')
         history=self.model.fit(dataForPrediction_dict['Train'], dataTrueValues_dict['Train'], epochs=self.configs_dict['numberOfEpochs'], batch_size=1, verbose=0)
+        self.has_trained = True
         print('Ended  : training of ML model')
         
         return history
     
-    def use_neural_network(self, is_training, dataset=None, plotter=None):
+    def use_neural_network(self, dataset=None, plotter=None):
         if dataset == None: dataset = self.dataset
         if plotter == None: plotter = self.plotter
         
@@ -62,7 +64,7 @@ class NeuralNetwork:
            dataForPrediction_dict,     dataTrueValues_dict,
          monthsForPrediction_dict, monthsForPredicted_dict) = dataset.format_data_for_model(self.configs_dict)
        
-        if is_training:
+        if not self.has_trained:
             history = self._train_ml_model(dataForPrediction_dict, dataTrueValues_dict)
             
         print('Started: applying ML model')        
@@ -71,11 +73,11 @@ class NeuralNetwork:
             'Test' : self.model.predict(dataForPrediction_dict['Test' ], verbose = 0)
                              }
         
-        self.evaluator.evaluate_and_plot(is_training   , dataset            ,
-                                plotter                , spei_dict          ,
-                                dataTrueValues_dict    , predictValues_dict ,
-                                monthsForPredicted_dict                     ,
-                                self.dataset.city_name , dataset.city_name  ,
-                                history if is_training else None            )
+        self.evaluator.evaluate_and_plot(self.has_trained, dataset           ,
+                                plotter                  , spei_dict         ,
+                                dataTrueValues_dict      , predictValues_dict,
+                                monthsForPredicted_dict                      ,
+                                self.dataset.city_name   , dataset.city_name ,
+                                history if not self.has_trained else None    )
         
         print('Ended: applying ML model')

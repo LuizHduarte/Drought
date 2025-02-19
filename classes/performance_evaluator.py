@@ -3,7 +3,7 @@ import numpy      as np
 
 class PerformanceEvaluator():
 
-    def evaluate_and_plot(self, is_training       , dataset            ,
+    def evaluate_and_plot(self, has_trained       , dataset            ,
                            plotter                , spei_dict          ,
                            dataTrueValues_dict    , predictValues_dict ,
                            monthsForPredicted_dict                     ,
@@ -11,12 +11,12 @@ class PerformanceEvaluator():
                            history=None                                ):
         
         
-        self._print_errors(dataTrueValues_dict, predictValues_dict, city_for_training, city_for_predicting, is_training)
+        self._print_errors(dataTrueValues_dict, predictValues_dict, city_for_training, city_for_predicting, has_trained)
         
         split_position = len(spei_dict['Train'])
         plotter.showSpeiData(spei_dict['Test' ], split_position)
         
-        if is_training:
+        if not has_trained:
             plotter.drawModelLineGraph(history, None, dataset.city_name)
             plotter.showSpeiTest(spei_dict['Test'], split_position)
             
@@ -40,15 +40,15 @@ class PerformanceEvaluator():
         
         return metrics_values
 
-    def _print_errors(self, dataTrueValues_dict, predictValues_dict, city_for_training, city_for_predicting, is_training):
+    def _print_errors(self, dataTrueValues_dict, predictValues_dict, city_for_training, city_for_predicting, has_trained):
     
-        match is_training:
-            case True :
-                print(f'\t\t--------------Result for {city_for_training} (training)---------------')
+        match has_trained:
             case False:
+                print(f'\t\t--------------Result for {city_for_training} (training)---------------')
+            case True :
                 print(f'\t\t--------------Result for {city_for_training} applied to {city_for_predicting}---------------')
             case _    :
-                print('Error in method _print_errors of class PerformanceEvaluator: the is_training state cannot be recognized.')
+                print('Error in method _print_errors of class PerformanceEvaluator: the has_trained state cannot be recognized.')
                 return False
     
         # RMSE, MSE, MAE, R²:
